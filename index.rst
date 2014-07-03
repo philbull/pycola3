@@ -29,7 +29,7 @@ Welcome to pyCOLA's documentation!
 :Version: |release|
 :Date: June 26, 2014
 :Homepage: `pyCOLA Homepage`_
-:Documentation: `PDF Documentation <https://bitbucket.org/tassev/pycola/.pdf>`_
+:Documentation: `PDF Documentation <https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf>`_
 :License: `GPLv3+ License`_
 
 .. _pyCOLA Homepage: https://bitbucket.org/tassev/pycola

@@ -159,7 +159,7 @@ large arrays, so one needs to install the development version from
 been fixed.
 
 The pyCOLA documentation can be found 
-`here <https://bitbucket.org/tassev/pycola/.pdf>`_, and the source
+`here <https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf>`_, and the source
 is on `bitbucket <https://bitbucket.org/tassev/pycola>`_.
 """
 
