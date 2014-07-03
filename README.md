@@ -32,4 +32,4 @@ Note that pyFFTW v0.9.2 does not support large arrays, so one needs to
 install the development version from `github 
 <https://github.com/hgomersall/pyFFTW>`_, where the bug has been fixed.
 
-* Read the manual at ???
+* Read the manual `here <https://bitbucket.org/tassev/pycola/downloads>`_./pyCOLA.pdf
