@@ -1,5 +1,6 @@
-Author: Svetlin V. Tassev (Harvard U, Princeton U)
-Initial public release date: Jul 3,2014
+**Author:** Svetlin V. Tassev (Harvard U, Princeton U)
+
+**Initial public release date:** Jul 3,2014
 
 pyCOLA is a multithreaded Python/Cython N-body code, implementing the 
 Comoving Lagrangian Acceleration (COLA) method in the temporal and 
@@ -20,9 +21,15 @@ If you use pyCOLA or the COLA method in the spatial and/or time domains for scie
 
 * pyCOLA is free and open-source software, distributed under the GPLv3 license.
 
-* To build the code, you need to run::
+* To build the code, you need to run:
   
+
+```
+#!bash
+
   python setup.py build_ext --inplace
+```
+
 
 * To compile successfully, you need to have the following packages installed: [Python 2.7](https://www.python.org/), [Cython](http://cython.org/), [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/),[pyFFTW](https://hgomersall.github.io/pyFFTW/index.html), [h5py](http://www.h5py.org/), as well as their respective dependencies. Note that pyFFTW v0.9.2 does not support large arrays, so one needs to install the development version from [github](https://github.com/hgomersall/pyFFTW), where the bug has been fixed.
 
