@@ -5,7 +5,13 @@ then runs COLA and finally outputs a figure containing a density
 slice. The script needs `matplotlib <http://matplotlib.org/>`_ to be 
 installed.
 
-To run the script, execute:: 
+To run the script, first generate MUSIC initial conditions with the 
+included configuration file::
+
+    MUSIC ics.conf
+
+Then change the variable ``music_file`` below to point to the MUSIC 
+snapshot, and then execute the example script by issuing:: 
 
     python ./example.py
 

@@ -31,7 +31,8 @@ if __name__ == '__main__':
     from cic import CICDeposit_3
     from potential import initialize_density
     
-    # Set up the parameters from the MUSIC ic:
+    # Set up the parameters from the MUSIC ic snapshot:
+    music_file="/media/stuff/ohahn-music-116353436ee6/ic_za.hdf5" # CHANGE!
 
     # Set up according to instructions for 
     # aux.boundaries()
@@ -63,7 +64,7 @@ if __name__ == '__main__':
 
     sx_full1, sy_full1, sz_full1, sx_full_zoom1, sy_full_zoom1, \
         sz_full_zoom1, offset_from_code \
-        = import_music_snapshot("/media/stuff/ohahn-music-116353436ee6/ic_za.hdf5", \
+        = import_music_snapshot(music_file, \
                                 boxsize,level0=level0,level1=level1)
     
     NPART_zoom=list(sx_full_zoom1.shape)
