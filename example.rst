@@ -29,7 +29,8 @@ The script produces the following figure:
 
 .. figure::  slab.jpg
    :align:   center
-   :width: 10cm
+   :width: 5cm
+   :height: 5cm
    
 .. literalinclude:: example.py
    :lines: 25-
