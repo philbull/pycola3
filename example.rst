@@ -1,6 +1,6 @@
 The following example is contained in :download:`example.py`. It 
-reads in a MUSIC-generades initial conditions at first order; 
-calculates the second order initial displacements on the full box; 
+reads in a MUSIC-generated initial conditions at first order; 
+calculates the second-order initial displacements on the full box; 
 then runs COLA and finally outputs a figure containing a density 
 slice. The script needs `matplotlib <http://matplotlib.org/>`_ to be 
 installed.
