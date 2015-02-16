@@ -13,9 +13,8 @@ pyCOLA is based on the following two papers:
    Cosmology and Astroparticle Physics, 06, 036 
    (2013), [arXiv:1301.0322](http://arxiv.org/abs/arXiv:1301.0322)
 
-2. Extending the N-body Comoving Lagrangian 
-   Acceleration Method to the Spatial Domain, S. Tassev, D. 
-   J. Eisenstein, B. D. Wandelt, M. Zaldarriaga, (2014)
+2. sCOLA: The N-body COLA Method Extended to the Spatial Domain, S. Tassev, D. 
+   J. Eisenstein, B. D. Wandelt, M. Zaldarriaga, (2015)
 
 If you use pyCOLA or the COLA method in the spatial and/or time domains for scientific work, we kindly ask you to reference the papers above.
 
