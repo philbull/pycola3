@@ -109,32 +109,32 @@ libraries = []
 ext_modules = [Extension(
     "cic",
     [sources[0]],
-    extra_compile_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
-    extra_link_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_compile_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_link_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
     libraries=libraries,
     include_dirs=include_dirs
 ),
 Extension(
     "potential",
     [sources[1]],
-    extra_compile_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
-    extra_link_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_compile_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_link_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
     libraries=libraries,
     include_dirs=include_dirs
 ),
 Extension(
     "acceleration",
     [sources[2]],
-    extra_compile_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
-    extra_link_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_compile_args=['-fopenmp','-O3','-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_link_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
     libraries=libraries,
     include_dirs=include_dirs
 ),
 Extension(
     "box_smooth",
     [sources[3]],
-    extra_compile_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
-    extra_link_args=['-fopenmp','-O3','-shared' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_compile_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
+    extra_link_args=['-fopenmp','-O3' ,'-pthread' ,'-fPIC' ,'-fwrapv','-fno-strict-aliasing'],
     libraries=libraries,
     include_dirs=include_dirs
 )
