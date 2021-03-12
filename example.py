@@ -67,6 +67,13 @@ if __name__ == '__main__':
         = import_music_snapshot(music_file, \
                                 boxsize,level0=level0,level1=level1)
     
+    sx_full1 = sx_full1.astype('float32')
+    sy_full1 = sy_full1.astype('float32')
+    sz_full1 = sz_full1.astype('float32')
+    sx_full_zoom1 = sx_full_zoom1.astype('float32')
+    sy_full_zoom1 = sy_full_zoom1.astype('float32')
+    sz_full_zoom1 = sz_full_zoom1.astype('float32')
+    
     NPART_zoom=list(sx_full_zoom1.shape)
 
 
