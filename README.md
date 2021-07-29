@@ -1,12 +1,14 @@
 **Author:** Svetlin V. Tassev (Harvard U, Princeton U)
+Ported to Python 3 by Phil Bull (Queen Mary University of London)
 
-**Initial public release date:** Jul 3,2014
+*Initial public release date:* Jul 3, 2014
+*Python 3 port released:* 29 Jul 2021
 
-pyCOLA is a multithreaded Python/Cython N-body code, implementing the 
+``pycola`` is a multithreaded Python/Cython N-body code, implementing the 
 Comoving Lagrangian Acceleration (COLA) method in the temporal and 
 spatial domains.
 
-pyCOLA is based on the following two papers:
+``pycola`` is based on the following two papers:
 
 1. Solving Large Scale Structure in Ten Easy Steps with 
    COLA, S. Tassev, M. Zaldarriaga, D. J. Eisenstein, Journal of 
@@ -16,20 +18,26 @@ pyCOLA is based on the following two papers:
 2. sCOLA: The N-body COLA Method Extended to the Spatial Domain, S. Tassev, D. 
    J. Eisenstein, B. D. Wandelt, M. Zaldarriaga, (2015)
 
-If you use pyCOLA or the COLA method in the spatial and/or time domains for scientific work, we kindly ask you to reference the papers above.
+If you use ``pycola`` or the COLA method in the spatial and/or time domains for 
+scientific work, we kindly ask you to reference the papers above.
 
-* pyCOLA is free and open-source software, distributed under the GPLv3 license.
+* ``pycola`` is free and open-source software, distributed under the GPLv3 license.
 
-* To build the code, you need to run:
+* To build and install the code, you need to run:
   
-
 ```
 #!bash
 
-  python setup.py build_ext --inplace
+  python setup.py install
 ```
 
-
-* To compile successfully, you need to have the following packages installed: [Python 2.7](https://www.python.org/), [Cython](http://cython.org/), [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/),[pyFFTW](https://hgomersall.github.io/pyFFTW/index.html), [h5py](http://www.h5py.org/), as well as their respective dependencies. Note that pyFFTW v0.9.2 does not support large arrays, so one needs to install the development version from [github](https://github.com/hgomersall/pyFFTW), where the bug has been fixed.
+``pycola`` depends on the following packages:
+ * numpy
+ * scipy
+ * cython
+ * pyfftw
+ * h5py
+ * multiprocessing
+ 
 
 * Read the manual [here](https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf).
