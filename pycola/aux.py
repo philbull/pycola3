@@ -22,6 +22,9 @@
 ########################################################################
 
 
+import numpy as np
+
+
 def boundaries(
     boxsize, level, level_zoom, NPART_zoom, offset_from_code, cut_from_sides, gridscale
 ):
@@ -91,14 +94,11 @@ def boundaries(
     **Example**: For example usage, see the worked out example in (todo).
 
     """
-
-    from numpy import array
-
     NPART = (2 ** level, 2 ** level, 2 ** level)
     cellsize = boxsize / 2.0 ** level
     cellsize_zoom = boxsize / 2.0 ** level_zoom
     gridcellsize = (cellsize) / float(gridscale)
-    BBox_out = array(
+    BBox_out = np.array(
         [
             [cut_from_sides[0], NPART[0] - cut_from_sides[1]],
             [cut_from_sides[0], NPART[1] - cut_from_sides[1]],
@@ -120,23 +120,23 @@ def boundaries(
                 level_zoom - level
             )
 
-    BBox_out_zoom = array(
+    BBox_out_zoom = np.array(
         [[ind0[0], ind1[0]], [ind0[1], ind1[1]], [ind0[2], ind1[2]]], dtype="int32"
     )
 
     # offset index of small sim box relative to large sim box (NOTE: sim, not IC boxes!!!)
     offset_index = (
-        array(offset_from_code, dtype="int32")
+        np.array(offset_from_code, dtype="int32")
         + BBox_out_zoom[:, 0] // 2 ** (level_zoom - level)
         - BBox_out[:, 0]
     )
     offset_zoom = (
         offset_index * cellsize
-        - array([cellsize_zoom, cellsize_zoom, cellsize_zoom], dtype="float32") / 2.0
+        - np.array([cellsize_zoom, cellsize_zoom, cellsize_zoom], dtype="float32") / 2.0
     )
 
     # bbox of small sim box relative to large sim box in large sim coo
-    BBox_in = array(
+    BBox_in = np.array(
         [
             [
                 offset_index[0],

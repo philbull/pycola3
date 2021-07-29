@@ -21,19 +21,21 @@
 ########################################################################
 ########################################################################
 
+import numpy as np
+from scipy import interpolate
+from multiprocessing import cpu_count
+import pyfftw
+import h5py
+
 
 def _power_spectrum(filename):
     """
     :math:`\\vspace{-1mm}`
 
 
-    Self-explanatory
+    Load power spectrum from CAMB-formatted text file.
     """
-    from scipy import interpolate
-    from numpy import loadtxt
-
-    (k_arr, p_arr) = loadtxt(filename).transpose()
-
+    (k_arr, p_arr) = np.loadtxt(filename).transpose()
     return interpolate.interp1d(k_arr, p_arr, kind="linear")
 
 
@@ -103,7 +105,7 @@ def initial_positions(
     In this example we generate the initial conditions in 2LPT, and
     then plot a slice through the 2LPT realization at redshift of zero.
 
-        >>> from ic import ic_za,ic_2lpt,initial_positions
+        >>> from pycola.ic import ic_za,ic_2lpt,initial_positions
         >>> sx,sy,sz=ic_za('camb_matterpower_z0.dat',npart=128)
         Memory allocation done
         Plans created
@@ -131,17 +133,10 @@ def initial_positions(
         <matplotlib.collections.PathCollection object at 0x7f2102cd3290>
         >>> plt.show()
 
-
-
-
-
     """
-
-    from numpy import indices
-
     npart_x, npart_y, npart_z = sx.shape
 
-    px, py, pz = indices((npart_x, npart_y, npart_z), dtype="float32")
+    px, py, pz = np.indices((npart_x, npart_y, npart_z), dtype="float32")
 
     px *= cellsize
     py *= cellsize
@@ -233,9 +228,6 @@ def import_music_snapshot(hdf5_filename, boxsize, level0="09", level1=None):
 
 
     """
-
-    import h5py
-
     print("Starting import ...")
     ss = h5py.File(hdf5_filename, "r")
 
@@ -1171,11 +1163,7 @@ def ic_2lpt_engine(
                 offset_zoom,
             )
 
-    ######
-    ######
     ###### Done with the two more force evaluations in the case of a 4pt rule.
-    ######
-    ######
 
     del density, den_k, den_fft, phi, phi_fft
 
@@ -1350,20 +1338,7 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
        trusting it for doing research. Use at your own risk.
 
     """
-
-    # import sys
-    # sys.path.append(dir)
-    # sys.path.append('/home/user/Builds/pyFFTW-master-20140621/pyfftw')
-    from numpy import pi, exp, sqrt
-    from numpy import random as rnd
-    from numpy import indices, where
-
-    # from cmath import exp
-    # from math import sqrt
-    import pyfftw
-    from multiprocessing import cpu_count
-
-    delta = 2.0 * pi / boxsize
+    delta = 2.0 * np.pi / boxsize
     nyq = npart // 2
 
     nalign = pyfftw.simd_alignment
@@ -1417,9 +1392,9 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
 
     print("Power spectrum read.")
 
-    rnd.seed(int(init_seed))
+    np.random.seed(int(init_seed))
 
-    x, y, z = indices((nyq + 1, nyq + 1, nyq + 1), dtype="float32")
+    x, y, z = np.indices((nyq + 1, nyq + 1, nyq + 1), dtype="float32")
 
     c = [(npart - i) % npart for i in range(nyq + 1)]
 
@@ -1427,11 +1402,11 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
 
     w2[0, 0, 0] = 1.0  # irrelevant but a zero crashes
 
-    amp = sqrt(p_of_k(sqrt(w2) * delta) / boxsize ** 3)
-    amp *= boxsize / (2.0 * pi)  # fix dimensions of 1/k
+    amp = np.sqrt(p_of_k(np.sqrt(w2) * delta) / boxsize ** 3)
+    amp *= boxsize / (2.0 * np.pi)  # fix dimensions of 1/k
 
-    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
-    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+    phi = np.exp(1j * 2.0 * np.pi * np.random.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= np.random.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
 
     sx_k[0 : nyq + 1, 0 : nyq + 1, 0 : nyq + 1] = x * phi / w2 * amp
     sy_k[0 : nyq + 1, 0 : nyq + 1, 0 : nyq + 1] = y * phi / w2 * amp
@@ -1439,8 +1414,8 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
 
     del phi
 
-    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
-    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+    phi = np.exp(1j * 2.0 * np.pi * np.random.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= np.random.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
 
     sx_k[c, 0 : nyq + 1, 0 : nyq + 1] = -x * phi / w2 * amp
     sy_k[c, 0 : nyq + 1, 0 : nyq + 1] = y * phi / w2 * amp
@@ -1448,8 +1423,8 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
 
     del phi
 
-    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
-    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+    phi = np.exp(1j * 2.0 * np.pi * np.random.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= np.random.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
 
     sx_k[0 : nyq + 1, c, 0 : nyq + 1] = x * phi / w2 * amp
     sy_k[0 : nyq + 1, c, 0 : nyq + 1] = -y * phi / w2 * amp
@@ -1457,8 +1432,8 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
 
     del phi
 
-    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
-    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+    phi = np.exp(1j * 2.0 * np.pi * np.random.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= np.random.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
 
     tmp = -x * phi / w2 * amp
     sx_k[npart - 1 : nyq - 1 : -1, 0, :] = tmp[1 : nyq + 1, 0, :]
@@ -1511,7 +1486,7 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
     ).conjugate()
     sz_k[npart - 1 : 0 : -1, 0, [0, nyq]] = (sz_k[1:npart, 0, [0, nyq]]).conjugate()
 
-    idx = where((x % nyq) + (y % nyq) + (z % nyq) == 0)
+    idx = np.where((x % nyq) + (y % nyq) + (z % nyq) == 0)
     del x, y, z
 
     sx_k[idx] = sx_k[idx].real

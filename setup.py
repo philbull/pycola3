@@ -112,6 +112,7 @@ setup_args = {
             "scipy",
             "h5py",
             "pyfftw",
+            "multiprocessing",
         ],
   }
 

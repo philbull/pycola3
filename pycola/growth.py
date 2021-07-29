@@ -21,20 +21,15 @@
 ########################################################################
 ########################################################################
 
+import numpy as np
+from scipy import integrate
 
-##################################################
-##################################################
-##################################################
-##################################################
 
 #   This solves for the linear growth factor and its derivative
 #   The notation follows eq. (A.1,A.2) of arXiv:1301.0322
 
-
 def _q_factor(a, Om, Ol):  # this is Q(a)
-    from math import sqrt
-
-    return a ** 3 * sqrt(Om / a ** 3 + Ol + (1.0 - Om - Ol) / a ** 2)
+    return a ** 3 * np.sqrt(Om / a ** 3 + Ol + (1.0 - Om - Ol) / a ** 2)
 
 
 def _growth_derivs(f, a, Om, Ol):
@@ -67,13 +62,7 @@ def growth_factor_solution(
       order of increasing scale factor :math:`a`. Here, the linear growth
       factor is given by :math:`D(a)`, while :math:`T[D](a)` is given by
       equation (A.1) of [temporalCOLA]_. These arrays can be further interpolated if needed.
-
-
-
     """
-    from scipy import integrate
-    from numpy import append, array
-
     a = [
         float(x) / 1000.0 for x in range(1, 1101)
     ]  # go to slightly later times so that no problems with interpolation occur
@@ -86,7 +75,7 @@ def growth_factor_solution(
         1001, 0
     ]  # divide by growth factor at a=1. index=1000+1 depend on the a=[...] above
 
-    return append(array([a]).transpose(), v, 1)
+    return np.append(np.array([a]).transpose(), v, 1)
 
 
 def growth_2lpt(a, d, Om):
@@ -133,10 +122,11 @@ def d_growth2(a, d, Om, Ol):
     """
     :math:`\\vspace{-1mm}`
 
-    Return :math:`T[D_2](a)` for the second order growth factor, :math:`D_2`, for a given scale factor and
-    respective linear growth factor. Here :math:`T` is given by
-    equation (A.1) of [temporalCOLA]_. One needs to precompute the linear growth factor.
-    :math:`\Lambda\mathrm{CDM}` is assumed for this calculation.
+    Return :math:`T[D_2](a)` for the second order growth factor, :math:`D_2`, 
+    for a given scale factor and respective linear growth factor. Here :math:`T` 
+    is given by equation (A.1) of [temporalCOLA]_. One needs to precompute the 
+    linear growth factor. :math:`\Lambda\mathrm{CDM}` is assumed for this 
+    calculation.
 
     **Arguments**:
 
@@ -151,22 +141,14 @@ def d_growth2(a, d, Om, Ol):
     * A float giving :math:`T[D_2](a)`.
 
     """
-
     d2 = growth_2lpt(a, d, Om)
     omega = Om / (Om + (1.0 - Om) * a * a * a)
     return _q_factor(a, Om, Ol) * (d2 / a) * 2.0 * omega ** (6.0 / 11.0)
 
 
-##################################################
-##################################################
-##################################################
-##################################################
-
-
 #   These are routines calculating the displacement and velocity
 #   coefficients for the COLA timestepping.
 #   See eq. (A.15) of arXiv:1301.0322
-
 
 def _u_ansatz(a, nCola):
     return a ** nCola
@@ -194,16 +176,9 @@ def _displ_coef(ai, af, ac, nCola, Om, Ol):
     """
     Needed in implementing (A.15) of http://arxiv.org/pdf/1301.0322v1.pdf
     """
-    from scipy import integrate
-
     coef = 1.0 / _u_ansatz(ac, nCola)
     coef *= integrate.quad(
         _displ_coef_integral, float(ai), float(af), args=(nCola, Om, Ol)
     )[0]
     return coef
 
-
-########################
-########################
-########################
-########################
