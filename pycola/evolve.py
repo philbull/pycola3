@@ -21,6 +21,24 @@
 ########################################################################
 ########################################################################
 
+import numpy as np
+from scipy import interpolate
+import time
+
+from .ic import initial_positions, ic_2lpt_engine
+from .growth import (
+    _vel_coef,
+    _displ_coef,
+    growth_factor_solution,
+    growth_2lpt,
+    d_growth2,
+    _q_factor,
+)
+from .potential import get_phi, initialize_density
+from .acceleration import grad_phi_engine
+from .cic import CICDeposit_3
+from .box_smooth import box_smooth
+
 
 def evolve(
     cellsize,
@@ -30,7 +48,7 @@ def evolve(
     sx2_full,
     sy2_full,
     sz2_full,
-    FULL=False,
+    covers_full_box=False,
     cellsize_zoom=0,
     sx_full_zoom=None,
     sy_full_zoom=None,
@@ -39,7 +57,7 @@ def evolve(
     sy2_full_zoom=None,
     sz2_full_zoom=None,
     offset_zoom=None,
-    BBox_in=None,
+    bbox_zoom=None,
     ngrid_x=None,
     ngrid_y=None,
     ngrid_z=None,
@@ -53,140 +71,136 @@ def evolve(
     a_initial=1.0 / 15.0,
     a_final=1.0,
     n_steps=15,
-    nCola=-2.5,
-    save_to_file=False,
-    file_npz_out="tmp.npz",
+    ncola=-2.5,
+    filename_npz=None,
+    verbose=True,
 ):
-    r"""
-    :math:`\vspace{-1mm}`
+    r"""Evolve a set of ICs forward in time using the COLA method.
 
-    Evolve a set of initial conditions forward in time using the COLA
-    method in both the spatial and temporal domains.
+    The COLA method operates in both the spatial and temporal domains.
 
-    **Arguments**:
+    Parameters
+    ----------
+    cellsize : float
+        The inter-particle spacing in Lagrangian space.
 
-    * ``cellsize`` --  a float. The inter-particle spacing in Lagrangian space.
+    sx_full, sy_full, sz_full : array_like
+        3D numpy ``float32`` arrays containing the components of the particle
+        displacements today as calculated in the Zel'dovich Approximation in
+        the full box.
 
-    * ``sx_full,sy_full,sz_full`` --  3-dim NumPy float32 arrays containing the
-      components of the particle displacements today as calculated in
-      the ZA in the full box. These particles should cover the COLA
-      volume only. If a refined subvolume is provided, these crude
-      particles which reside inside that subvolume are discarded and
-      replaced with the fine particles. There arrays are overwritten.
+        These particles should cover the COLA volume only. If a refined
+        subvolume is provided, these crude particles which reside inside that
+        subvolume are discarded and replaced with the fine particles. These
+        arrays are overwritten.
 
-    * ``sx2_full,sy2_full,sz2_full`` -- same as above but for the second
-      order displacement field.
+    sx2_full, sy2_full, sz2_full : array_like
+        Same as above but for the second-order displacement field.
 
-    * ``FULL`` -- a boolean (default: ``False``). If True, it indicates to
-      the code that the COLA volume covers the full box. In that case,
-      LPT in the COLA volume is not calculated, as that matches the LPT
-      in the full box.
+    covers_full_box: bool, optional
+        Indicates whether the COLA volume covers the full box. If True, LPT in
+        the COLA volume is not calculated, as it matches the LPT in the full
+        box. Default: False.
 
+    cellsize_zoom : float, optional
+        The inter-particle spacing in Lagrangian space for the refined
+        subvolume, if such is provided. If not, ``cellsize_zoom`` must be set
+        to zero, as that is used as a check for the presence of a subvolume.
+        Default: 0.
 
-    * ``cellsize_zoom`` -- a float (default: ``0``). The inter-particle
-      spacing in Lagrangian space for the refined subvolume, if such is
-      provided. If not, ``cellsize_zoom`` must be set to zero
-      (default), as that is used as a check for the presence of that
-      subvolume.
+    s*_full_zoom, s*2_full_zoom : array_like, optional
+        Same as above, but for the refined region. Default: None.
 
-    * ``s*_full_zoom,s*2_full_zoom`` -- same as without ``_zoom``
-      above, but for the refined region (default: ``None``).
+    offset_zoom : array_like, optional
+        Array (3-vector) of floats, giving the physical coordinates of the
+        origin of the refinement region relative to the the origin of the full
+        box. Default: None.
 
+    bbox_zoom : array_like, optional
+        A 3x2 array of integers of the form ``[[i0,i1],[j0,j1],[k0,k1]]``. This
+        gives the bounding box for the refinement region in units of the crude
+        particles Lagrangian index. Thus, the particles with displacements
+        ``sx_full|sy_full|sz_full[i0:i1,j0:j1,k0:k1]`` are replaced with fine
+        particles with displacements ``sx_full_zoom|sy_full_zoom|sz_full_zoom``.
 
-    * ``offset_zoom`` -- a 3-vector of floats (default: ``None``). Gives the
-      physical coordinates of the origin of the refinement region
-      relative to the the origin of the full box.
+    ngrid_x, ngrid_y, ngrid_z : int, optional
+        The size of the PM grid, which the algorithm uses to calculate the
+        forces for the kicks. Default: None.
 
-    * ``BBox_in`` -- a 3x2 array of integers (default: ``None``). It has the
-      form ``[[i0,i1],[j0,j1],[k0,k1]]``, which gives the bounding box
-      for the refinement region in units of the crude particles
-      Lagrangian index. Thus, the particles with displacements
-      ``sx_full|sy_full|sz_full[i0:i1,j0:j1,k0:k1]`` are replaced with the fine
-      particles with displacements ``sx_full_zoom|sy_full_zoom|sz_full_zoom``.
+    gridcellsize : float, optional
+        The grid spacing of the PM grid, which the algorithm uses to calculate
+        the forces for the kicks. Default: None.
 
-    * ``ngrid_x,ngrid_y,ngrid_z`` -- integers (default: ``None``). Provide the size of the
-      PM grid, which the algorithm uses to calculate the forces for the
-      Kicks.
+    ngrid_x_lpt, ngrid_y_lpt, ngrid_z_lpt : int, optional
+        Same as above, but for calculating the LPT displacements in the COLA
+        volume. These better match their counterparts above for the force
+        calculation, as mismatches often lead to unexpected non-cancellations
+        and artifacts. Default: None.
 
-    * ``gridcellsize`` --float (default: ``None``). Provide the grid spacing of the PM
-      grid, which the algorithm uses to calculate the forces for the
-      Kicks.
+    gridcellsize_lpt : float, optional
+        Same as above, for the LPT displacements. Default: None.
 
-    * ``ngrid_x_lpt,ngrid_y_lpt,ngrid_z_lpt,gridcellsize_lpt`` -- the
-      same as without ``_lpt`` above but for calculating the LPT
-      displacements in the COLA volume. These better match their
-      counterparts above for the force calculation, as mismatches often
-      lead to unexpected non-cancellations and artifacts.
+    Om, Ol : float, optional
+        Cosmological parameters: The matter density today, :math:`\Omega_m`,
+        (default: ``0.274``), and the Cosmological Constant density today,
+        :math:`\Omega_\Lambda` (default: ``1.-0.274``).
 
-    * ``Om`` -- a float (default: ``0.274``), giving the matter density, :math:`\Omega_m`, today.
+    a_initial : float, optional
+        The initial scale factor from which to start the COLA evolution. This
+        should be near ``1/n_steps``. Default: 1/15.
 
-    * ``Ol`` -- a float (default: ``1.-0.274``), giving the vacuum density, :math:`\Omega_\Lambda`, today.
+    a_final : float, optional
+        The final scale factor for the COLA evolution. Default: 1.
 
-    * ``a_initial`` -- a float (default: ``1./15.``). The initial scale
-      factor from which to start the COLA evolution. This better be
-      near ``1/n_steps``.
+    n_steps : int, optional
+        The total number of timesteps that the COLA algorithm should make.
+        Default: 15.
 
-    * ``a_final`` -- a float (default: ``1.0``). The final scale
-      factor for the COLA evolution.
+    ncola : float, optional
+        The spectral index for the time-domain COLA. Reasonable values lie in
+        the range ``(-4, 3.5)``. Can't be 0 exactly, but can be near 0. See
+        Section A.3 of [temporalCOLA]_. Default: -2.5.
 
-    * ``n_steps`` -- an integer (default: ``15``). The total number of
-      timesteps which the COLA algorithm should make.
+    filename_npz : str, optional
+        Filename for the numpy ``.npz`` container file in which to save the
+        snapshot and selected metadata. If ``None``, no file will be saved.
+        Default: None.
 
-    * ``nCola`` -- a float (default: ``-2.5``). The spectral index for the time-domain COLA.
-      Sane values lie in the range ``(-4,3.5)``. Cannot be ``0``, but of course can be near ``0`` (say ``0.001``).
-      See Section A.3 of [temporalCOLA]_.
+    verbose : bool, optional
+        Whether to print progress messages. Default: True.
 
-    * ``save_to_file`` -- a boolean (default: ``False``). Whether to save the final snapshot to file.
+    Returns
+    -------
+    px, py, pz : array_like
+        3D float32 arrays containing the components of the particle positions
+        inside the COLA volume. Units are :math:`\mathrm{Mpc}/h`.
 
-    * ``file_npz_out`` -- a string (default: ``'tmp.npz'``), giving the
-      filename for the ``.npz``  `SciPy
-      file <http://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html>`_,
-      in which to save the snapshot. See the source file for what is actually saved.
+    vx, vy, vz : array_like
+        3D float32 arrays containing the components of the particle velocities,
+        :math:`\bm{v}`. Velocities are in units of :math:`\mathrm{Mpc}/h`, and
+        are calculated according to:
 
-    **Return**:
+        .. math::
+          :nowrap:
 
-    * ``px,py,pz`` -- 3-dim float32 arrays containing the components of the particle positions inside the COLA volume.
+          \begin{eqnarray}
+              \bm{v}\equiv \frac{1}{a\,H(a)}\frac{d\bm{x}}{d\eta}
+          \end{eqnarray}
 
-    * ``vx,vy,vz`` -- 3-dim float32 arrays containing the components of
-      the particle velocities, :math:`\bm{v}`. Velocities are in units
-      of :math:`\mathrm{Mpc}/h` and are calculated according to:
-
-      .. math::
-        :nowrap:
-
-        \begin{eqnarray}
-            \bm{v}\equiv \frac{1}{a\,H(a)}\frac{d\bm{x}}{d\eta}
-        \end{eqnarray}
-
-      where :math:`\eta` is conformal time; :math:`a` is the final scale
-      factor ``a_final``; :math:`H(a)` is the Hubble parameter;
-      :math:`\bm{x}` is the comoving position. This definition allows
-      calculating redshift-space positions trivial: one simply has to
-      add the line-of-sight velocity to the particle position.
+        where :math:`\eta` is conformal time, :math:`a` is the final scale
+        factor ``a_final``, :math:`H(a)` is the Hubble parameter, and
+        :math:`\bm{x}` is the comoving position. This definition makes
+        calculating redshift-space positions trivial: one simply has to
+        add the line-of-sight velocity to the particle position.
     """
 
-    from numpy import array, zeros
-    from .ic import initial_positions, ic_2lpt_engine
-    from .growth import (
-        _vel_coef,
-        _displ_coef,
-        growth_factor_solution,
-        growth_2lpt,
-        d_growth2,
-    )
-    from .potential import get_phi, initialize_density
-    from .acceleration import grad_phi_engine
-    from scipy import interpolate
-    from .cic import CICDeposit_3
-
     if cellsize_zoom == 0:
-        BBox_in = array([[0, 0], [0, 0], [0, 0]], dtype="int32")
+        bbox_zoom = np.array([[0, 0], [0, 0], [0, 0]], dtype="int32")
     else:
         offset_zoom = offset_zoom.astype("float32")
-    offset = array([0.0, 0.0, 0.0], dtype="float32")
+    offset = np.array([0.0, 0.0, 0.0], dtype="float32")
 
     # time-related stuff
-
     da = (a_final - a_initial) / float(n_steps)
 
     d = growth_factor_solution(Om, Ol)
@@ -212,14 +226,12 @@ def evolve(
 
     #############
 
-    import time
-
     start = time.time()
 
     #####################
     # Do LPT in COLA box
     #####################
-    if FULL:
+    if covers_full_box:
         # if (COLA box)=(full box), then their lpt's match:
         sx = sx_full
         sy = sy_full
@@ -240,7 +252,8 @@ def evolve(
 
     else:
         # if (COLA box) != (full box), then we need the lpt in the COLA box:
-        print("Calculate LPT in the COLA box...")
+        if verbose:
+            print("Calculating LPT in the COLA box")
         (
             sx,
             sy,
@@ -268,7 +281,7 @@ def evolve(
             sy2_full=sy2_full,
             sz2_full=sz2_full,
             cellsize_zoom=cellsize_zoom,
-            BBox_in=BBox_in,
+            bbox_zoom=bbox_zoom,
             sx_full_zoom=sx_full_zoom,
             sy_full_zoom=sy_full_zoom,
             sz_full_zoom=sz_full_zoom,
@@ -277,7 +290,8 @@ def evolve(
             sz2_full_zoom=sz2_full_zoom,
             offset_zoom=offset_zoom,
         )
-        print("... done")
+        if verbose:
+            print("    Done.")
 
     #######################
     # Some initializations:
@@ -289,7 +303,8 @@ def evolve(
     density, den_k, den_fft, phi_fft = initialize_density(ngrid_x, ngrid_y, ngrid_z)
 
     # positions:
-    print("Initializing particle positions...")
+    if verbose:
+        print("Initializing particle positions")
     px, py, pz = initial_positions(
         sx_full,
         sy_full,
@@ -322,19 +337,18 @@ def evolve(
             gridcellsize,
             offset=offset_zoom,
         )
-    print("...done")
+    if verbose:
+        print("    Done.")
 
     # velocities:
 
-    # Initial residual velocities are zero in COLA.
-    # This corresponds to the L_- operator in 1301.0322.
-    # But to avoid short-scale
-    # noise, we do the smoothing trick explained in the new paper.
-    # However, that smoothing should not affect the IC velocities!
-    # So, first add the full vel, then further down subtract the same but smoothed.
-    #
-    # This smoothing is not really needed if FULL=True. But that case is
-    # not very interesting here, so we do it just the same.
+    # Initial residual velocities are zero in COLA. This corresponds to the L_- 
+    # operator in 1301.0322. But to avoid short-scale noise, we do the 
+    # smoothing trick explained in the new paper. However, that smoothing 
+    # should not affect the IC velocities! So, first add the full vel, then 
+    # further down subtract the same but smoothed.
+    # This smoothing is not really needed if covers_full_box=True. But that 
+    # case is not very interesting here, so we do it just the same.
     vx = initial_d_growth * (sx_full) + initial_d_growth2 * (sx2_full)
     vy = initial_d_growth * (sy_full) + initial_d_growth2 * (sy2_full)
     vz = initial_d_growth * (sz_full) + initial_d_growth2 * (sz2_full)
@@ -350,10 +364,10 @@ def evolve(
             sz2_full_zoom
         )
 
-    print("Smoothing arrays for the COLA game ...")
-    from .box_smooth import box_smooth
+    if verbose:
+        print("Smoothing arrays for the COLA game")
 
-    tmp = zeros(sx_full.shape, dtype="float32")
+    tmp = np.zeros(sx_full.shape, dtype="float32")
     box_smooth(sx_full, tmp)
     sx_full[:] = tmp[:]
     box_smooth(sy_full, tmp)
@@ -381,7 +395,7 @@ def evolve(
     sz2[:] = tmp[:]
     del tmp
     if cellsize_zoom != 0:
-        tmp = zeros(sx_full_zoom.shape, dtype="float32")
+        tmp = np.zeros(sx_full_zoom.shape, dtype="float32")
         box_smooth(sx_full_zoom, tmp)
         sx_full_zoom[:] = tmp[:]
         box_smooth(sy_full_zoom, tmp)
@@ -408,7 +422,8 @@ def evolve(
         box_smooth(sz2_zoom, tmp)
         sz2_zoom[:] = tmp[:]
         del tmp
-    print("... done")
+    if verbose:
+        print("    Done.")
 
     # All s* arrays are now smoothed!
     # Next subtract smoothed vels as prescribed above.
@@ -426,13 +441,13 @@ def evolve(
             sz2_full_zoom
         )
 
-    # vx = zeros(sx.shape,dtype='float32')
-    # vy = zeros(sx.shape,dtype='float32')
-    # vz = zeros(sx.shape,dtype='float32')
+    # vx = np.zeros(sx.shape,dtype='float32')
+    # vy = np.zeros(sx.shape,dtype='float32')
+    # vz = np.zeros(sx.shape,dtype='float32')
     # if (cellsize_zoom!=0):
-    #    vx_zoom = zeros(sx_zoom.shape,dtype='float32')
-    #    vy_zoom = zeros(sx_zoom.shape,dtype='float32')
-    #    vz_zoom = zeros(sx_zoom.shape,dtype='float32')
+    #    vx_zoom = np.zeros(sx_zoom.shape,dtype='float32')
+    #    vy_zoom = np.zeros(sx_zoom.shape,dtype='float32')
+    #    vz_zoom = np.zeros(sx_zoom.shape,dtype='float32')
 
     # scale factors:
     # initialize scale factor
@@ -448,9 +463,11 @@ def evolve(
     dummy = 0.0  # yet another dummy
 
     ####################
-    # DO THE TIMESTEPS!!!
+    # DO THE TIMESTEPS
     ####################
-
+    if verbose:
+        print("Beginning evolution")
+        
     for i in range(n_steps + 1):
 
         if i == 0 or i == n_steps:
@@ -459,7 +476,7 @@ def evolve(
             afKick = aiKick + da
 
         ################
-        # FORCES!
+        # FORCES
         ################
 
         # Calculate PM density:
@@ -478,7 +495,7 @@ def evolve(
             0,
             dummy,
             dummy,
-            BBox_in,
+            bbox_zoom,
             offset,
             1,
         )
@@ -496,14 +513,12 @@ def evolve(
                 0,
                 dummy,
                 dummy,
-                array([[0, 0], [0, 0], [0, 0]], dtype="int32"),
+                np.array([[0, 0], [0, 0], [0, 0]], dtype="int32"),
                 offset_zoom,
                 1,
             )
 
         density -= 1.0
-
-        # print "ave den",density.mean(dtype=float64)
 
         # Calculate potential
         get_phi(
@@ -512,9 +527,9 @@ def evolve(
         phi = density  # density now holds phi, so rename it
 
         ################
-        # KICK!
+        # KICK
         ################
-        beta = -1.5 * aDrift * Om * _vel_coef(aiKick, afKick, aDrift, nCola, Om, Ol)
+        beta = -1.5 * aDrift * Om * _vel_coef(aiKick, afKick, aDrift, ncola, Om, Ol)
         d = growth(aDrift)
         Om143 = (Om / (Om + (1.0 - Om) * aDrift * aDrift * aDrift)) ** (1.0 / 143.0)
 
@@ -546,7 +561,7 @@ def evolve(
             gridcellsize,
             d,
             d * d * (1.0 + 7.0 / 3.0 * Om143),
-            array([0.0, 0.0, 0.0], dtype="float32"),
+            np.array([0.0, 0.0, 0.0], dtype="float32"),
             0,
         )
         if cellsize_zoom != 0:
@@ -576,7 +591,7 @@ def evolve(
                 gridcellsize,
                 d,
                 d * d * (1.0 + 7.0 / 3.0 * Om143),
-                array([0.0, 0.0, 0.0], dtype="float32"),
+                np.array([0.0, 0.0, 0.0], dtype="float32"),
                 0,
             )
 
@@ -585,13 +600,15 @@ def evolve(
         aKick = afKick
         aiKick = afKick
 
-        print("Kicked to a = " + str(aKick))
+        if verbose:
+            print("    Kicked to a =  %4.4f" % aKick)
+        
         ################
-        # DRIFT!
+        # DRIFT
         ################
         if i < n_steps:
             afDrift = aiDrift + da
-            alpha = _displ_coef(aiDrift, afDrift, aKick, nCola, Om, Ol)
+            alpha = _displ_coef(aiDrift, afDrift, aKick, ncola, Om, Ol)
             gamma = 1.0 * (growth(afDrift) - growth(aiDrift))
             gamma2 = 1.0 * (
                 growth_2lpt(afDrift, growth(afDrift), Om)
@@ -648,7 +665,8 @@ def evolve(
 
             aiDrift = afDrift
             aDrift = afDrift
-            print("Drifted to a = " + str(aDrift))
+            if verbose:
+                print("    Drifted to a = %4.4f" % (aDrift))
 
     del den_k, den_fft, phi_fft, density
 
@@ -665,8 +683,6 @@ def evolve(
 
     # Now convert velocities to
     # v_{rsd}\equiv (ds/d\eta)/(a H(a)):
-    from .growth import _q_factor
-
     rsd_fac = a_final / _q_factor(a_final, Om, Ol)
     vx *= rsd_fac
     vy *= rsd_fac
@@ -677,13 +693,13 @@ def evolve(
         vz_zoom *= rsd_fac
 
     end = time.time()
-    print("Time elapsed on small box (including IC): " + str(end - start) + " seconds.")
+    if verbose:
+        print("Time elapsed on small box (incl. IC): %3.3f sec" % (end - start))
 
-    if save_to_file:
-        from numpy import savez
+    if filename_npz is not None:
 
-        savez(
-            file_npz_out,
+        np.savez(
+            filename_npz,
             px_zoom=px_zoom,
             py_zoom=py_zoom,
             pz_zoom=pz_zoom,
@@ -706,7 +722,7 @@ def evolve(
             n_steps=n_steps,
             Om=Om,
             Ol=Ol,
-            nCola=nCola,
+            ncola=ncola,
             ngrid_x_lpt=ngrid_x_lpt,
             ngrid_y_lpt=ngrid_y_lpt,
             ngrid_z_lpt=ngrid_z_lpt,

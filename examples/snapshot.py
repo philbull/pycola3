@@ -52,7 +52,7 @@ sx2, sy2, sz2 = pycola.ic.ic_2lpt(cellsize, sx, sy, sz, boxsize=BOXSIZE)
 # Evolve particles
 px, py, pz, vx, vy, vz, *_ = pycola.evolve.evolve(cellsize, 
                                               sx, sy, sz, sx2, sy2, sz2, 
-                                              FULL=True, 
+                                              covers_full_box=True, 
                                               gridcellsize=gridcellsize,
                                               ngrid_x=NGRID, 
                                               ngrid_y=NGRID, 
@@ -61,10 +61,7 @@ px, py, pz, vx, vy, vz, *_ = pycola.evolve.evolve(cellsize,
                                               Ol=omega_lam, 
                                               a_initial=1./(1.+zi), 
                                               a_final=1./(1.+zf),
-                                              save_to_file=True,
-                                              file_npz_out=SNAPSHOT_FILE
+                                              filename_npz=SNAPSHOT_FILE
                                               )
-                                              #snapshot_root=SNAPSHOT_ROOT,
-                                              #snapshot_zmax=3.)
                                               
 print("Finished.")
