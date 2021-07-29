@@ -77,7 +77,7 @@ if __name__ == '__main__':
     NPART_zoom=list(sx_full_zoom1.shape)
 
 
-    print "Starting 2LPT on full box."
+    print("Starting 2LPT on full box.")
     
     #Get bounding boxes for full box with 1 refinement level for MUSIC.
     BBox_in, offset_zoom, cellsize, cellsize_zoom, \
@@ -158,8 +158,8 @@ if __name__ == '__main__':
     del sx2_full1, sy2_full1, sz2_full1, sx2_full_zoom1, sy2_full_zoom1, sz2_full_zoom1
 
 
-    print "2LPT on full box is done."
-    print "Starting COLA!"
+    print("2LPT on full box is done.")
+    print("Starting COLA!")
 
 
 
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
 
 
-    print "Making a figure ..."
+    print("Making a figure ...")
     # grid size for figure array
     ngrid=2*512
     # physical size of figure array

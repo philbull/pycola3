@@ -231,7 +231,7 @@ def import_music_snapshot(hdf5_filename,boxsize,level0='09',level1=None):
     """
     
     import h5py
-    print "Starting import ..."
+    print("Starting import ...")
     ss = h5py.File(hdf5_filename, "r")
     
     # for some reason MUSIC pads with 4 elements the displacement arrays  
@@ -250,11 +250,11 @@ def import_music_snapshot(hdf5_filename,boxsize,level0='09',level1=None):
         sy_zoom = ss['level_0'+level1+'_DM_dy'].value[4:-4, 4:-4,  4:-4]*boxsize
         sz_zoom = ss['level_0'+level1+'_DM_dz'].value[4:-4, 4:-4,  4:-4]*boxsize
         del ss
-        print "... done"
+        print("... done")
         return sx, sy, sz, sx_zoom, sy_zoom, sz_zoom,offset
     else:
         del ss
-        print "... done"
+        print("... done")
         return sx, sy, sz
 
 
@@ -1181,7 +1181,7 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     sz_k = sz_pad.view('complex64')
     
     
-    print "Memory allocation done"
+    print("Memory allocation done")
     
     nthreads=cpu_count()
     
@@ -1189,11 +1189,11 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     sy_fft=pyfftw.FFTW(sy_k,sy, axes=(0,1,2),direction='FFTW_BACKWARD',threads=nthreads,flags=('FFTW_ESTIMATE','FFTW_DESTROY_INPUT'))
     sz_fft=pyfftw.FFTW(sz_k,sz, axes=(0,1,2),direction='FFTW_BACKWARD',threads=nthreads,flags=('FFTW_ESTIMATE','FFTW_DESTROY_INPUT'))
     
-    print "Plans created"
+    print("Plans created")
     
     p_of_k=_power_spectrum(file_pk)
     
-    print "Power spectrum read."
+    print("Power spectrum read.")
     
     from numpy import random as rnd
     from numpy import indices
@@ -1270,7 +1270,7 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     
     
 
-    print "Randoms done."
+    print("Randoms done.")
 
     sx_k[0,0,0]=0
     sy_k[0,0,0]=0
@@ -1302,22 +1302,22 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     
     del i
     
-    print "Nyquists fixed"
+    print("Nyquists fixed")
     
     sx_fft(normalise_idft=False)
     #sX=sx.copy()
     del sx_k,sx_fft, sx_pad
-    print "sx fft ready"
+    print("sx fft ready")
     
     sy_fft(normalise_idft=False)
     #sY=sy.copy()
     del sy_k,sy_fft, sy_pad
-    print "sy fft ready"
+    print("sy fft ready")
     
     sz_fft(normalise_idft=False)
     #sZ=sz.copy()
     del sz_k,sz_fft, sz_pad
-    print "sz fft ready"
+    print("sz fft ready")
     
     
     

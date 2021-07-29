@@ -236,7 +236,7 @@ def evolve(
         
     else:
         # if (COLA box) != (full box), then we need the lpt in the COLA box:
-        print "Calculate LPT in the COLA box..."
+        print("Calculate LPT in the COLA box...")
         sx,sy,sz,sx2,sy2,sz2,sx_zoom,sy_zoom,sz_zoom,sx2_zoom,sy2_zoom,sz2_zoom  = ic_2lpt_engine(   
                 sx_full,          
                 sy_full,          
@@ -262,7 +262,7 @@ def evolve(
                 sz2_full_zoom = sz2_full_zoom,
                 
                 offset_zoom=offset_zoom)
-        print "... done"
+        print("... done")
 
 
 
@@ -275,7 +275,7 @@ def evolve(
     density,den_k,den_fft,phi_fft  = initialize_density(ngrid_x,ngrid_y,ngrid_z)
 
 # positions:
-    print "Initializing particle positions..."
+    print("Initializing particle positions...")
     px, py, pz = initial_positions( 
                                     sx_full, 
                                     sy_full, 
@@ -311,7 +311,7 @@ def evolve(
                                     ngrid_z,
                                     gridcellsize,
                                     offset = offset_zoom)
-    print "...done"
+    print("...done")
     
 # velocities:
 
@@ -333,7 +333,7 @@ def evolve(
         vy_zoom = initial_d_growth *  (sy_full_zoom) + initial_d_growth2 * (sy2_full_zoom)
         vz_zoom = initial_d_growth *  (sz_full_zoom) + initial_d_growth2 * (sz2_full_zoom)
     
-    print "Smoothing arrays for the COLA game ..."
+    print("Smoothing arrays for the COLA game ...")
     from box_smooth import box_smooth
     tmp=zeros(sx_full.shape,dtype='float32')
     box_smooth(sx_full, tmp)
@@ -390,7 +390,7 @@ def evolve(
         box_smooth(sz2_zoom, tmp)
         sz2_zoom[:]=tmp[:]
         del tmp
-    print "... done"
+    print("... done")
     
     #All s* arrays are now smoothed!
     #Next subtract smoothed vels as prescribed above.
@@ -497,7 +497,7 @@ def evolve(
         aKick  = afKick                                                                                                                    
         aiKick = afKick                                                                                                              
                                                                                                                                        
-        print "Kicked to a = "+str(aKick)                                                                                                                                   
+        print("Kicked to a = "+str(aKick))                                                                                                                                   
         ################                                                                                                                                                    
         # DRIFT!                                                                                                                                                            
         ################                                                                                                                                                    
@@ -527,7 +527,7 @@ def evolve(
             
             aiDrift = afDrift                                                                                                                                                      
             aDrift  = afDrift
-            print "Drifted to a = "+str(aDrift)
+            print("Drifted to a = "+str(aDrift))
         
         
 
@@ -560,7 +560,7 @@ def evolve(
         vz_zoom *=rsd_fac
     
     end = time.time()
-    print "Time elapsed on small box (including IC): "+str(end - start) + " seconds."
+    print("Time elapsed on small box (including IC): "+str(end - start) + " seconds.")
     
     if save_to_file:
         from numpy import savez

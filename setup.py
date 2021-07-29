@@ -89,8 +89,8 @@ except ImportError as e:
     ]
     for i in sources:
         if not os.path.exists(i):
-            print i
-            print os.path.exists(i)
+            print(i)
+            print(os.path.exists(i))
             raise ImportError(str(e) + '. ' +
                 'Cython is required to build the initial .c file.')
 
