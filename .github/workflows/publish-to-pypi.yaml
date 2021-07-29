@@ -16,7 +16,8 @@ jobs:
         run: |
           sudo apt install libfftw3-dev
           python -m pip install build setuptools_scm wheel
-          python -m pip install numpy==1.20 cython pyfftw
+          python -m pip install numpy==1.20 cython
+          python -m pip install pyfftw
       - name: Build a binary wheel and a source tarball
         uses: RalfG/python-wheels-manylinux-build@v0.3.4-manylinux2010_x86_64
         with:
