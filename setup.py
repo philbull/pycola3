@@ -26,10 +26,10 @@ from Cython.Build import cythonize
 from setuptools import Extension, find_namespace_packages, setup
 
 sources = {
-    "pycola3._cic": "pycola3/src/cic.pyx",
-    "pycola3._potential": "pycola3/src/potential.pyx",
-    "pycola3._acceleration": "pycola3/src/acceleration.pyx",
-    "pycola3._box_smooth": "pycola3/src/box_smooth.pyx",
+    "pycola3.cic": "pycola3/src/cic.pyx",
+    "pycola3.potential": "pycola3/src/potential.pyx",
+    "pycola3.acceleration": "pycola3/src/acceleration.pyx",
+    "pycola3.box_smooth": "pycola3/src/box_smooth.pyx",
 }
 
 # Compile and link arguments for Cython modules
@@ -101,7 +101,7 @@ is on `bitbucket <https://bitbucket.org/tassev/pycola>`_.
 
 setup_args = {
     "name": "pycola3",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "author": "Phil Bull / Svetlin V. Tassev",
     "author_email": "philbull@gmail.com",
     "description": "A Python/Cython N-body code, implementing the Comoving Lagrangian Acceleration (COLA) method in the temporal and spatial domains.",

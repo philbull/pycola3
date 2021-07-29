@@ -4,7 +4,7 @@ over a series of redshift slices.
 """
 import numpy as np
 
-import pycola
+import pycola3
 
 # Cosmological parameters
 omega_m = 0.316
@@ -40,7 +40,7 @@ halo_mmin = HALO_NPART_MIN * particle_mass(zf)  # Minimum halo mass
 print("Min. halo mass: %3.2e Msun" % halo_mmin)
 
 # Calculate ZA initial conditions
-sx, sy, sz = pycola.ic.ic_za(
+sx, sy, sz = pycola3.ic.ic_za(
     "camb_matterpower_z0.dat", boxsize=BOXSIZE, npart=NPART, init_seed=SEED
 )
 cellsize = BOXSIZE / float(sx.shape[0])
@@ -49,10 +49,10 @@ print("cellsize:", cellsize)
 print("gridcellsize:", gridcellsize)
 
 # Calculate 2LPT positions
-sx2, sy2, sz2 = pycola.ic.ic_2lpt(cellsize, sx, sy, sz, boxsize=BOXSIZE)
+sx2, sy2, sz2 = pycola3.ic.ic_2lpt(cellsize, sx, sy, sz, boxsize=BOXSIZE)
 
 # Evolve particles
-px, py, pz, vx, vy, vz, *_ = pycola.evolve.evolve(
+px, py, pz, vx, vy, vz, *_ = pycola3.evolve.evolve(
     cellsize,
     sx,
     sy,
