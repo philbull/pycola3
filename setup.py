@@ -113,6 +113,7 @@ setup_args = {
             "h5py",
             "pyfftw",
             "multiprocessing",
+            "cython"
         ],
   }
 
