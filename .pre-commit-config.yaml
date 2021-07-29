@@ -36,6 +36,7 @@ repos:
   rev: 21.5b1
   hooks:
   - id: black
+    include: pycola/*.py
 
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.8.0
