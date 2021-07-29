@@ -21,6 +21,9 @@ jobs:
         with:
           python-versions: 'cp37-cp37m'
           build-requirements: 'cython numpy'
+      - name: Check what's in the dist directory
+        run: |
+          ls -lh dist/
       # deploy to Test PyPI on any push except when merging to master, since that will
       # already exist, and thus fail.
       - name: Publish distribution to Test PyPI
