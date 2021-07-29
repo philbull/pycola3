@@ -25,11 +25,11 @@ if __name__ == '__main__':
 
     import numpy as np
     import matplotlib.pyplot as plt
-    from aux import boundaries
-    from ic import ic_2lpt,import_music_snapshot
-    from evolve import evolve
-    from cic import CICDeposit_3
-    from potential import initialize_density
+    from pycola.aux import boundaries
+    from pycola.ic import ic_2lpt,import_music_snapshot
+    from pycola.evolve import evolve
+    from pycola.cic import CICDeposit_3
+    from pycola.potential import initialize_density
     
     # Set up the parameters from the MUSIC ic snapshot:
     music_file="/media/stuff/ohahn-music-116353436ee6/ic_za.hdf5" # CHANGE!
