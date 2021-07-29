@@ -107,6 +107,7 @@ setup_args = {
     "description": "A Python/Cython N-body code, implementing the Comoving Lagrangian Acceleration (COLA) method in the temporal and spatial domains.",
     "url": "http://ascl.net/1509.007",
     "long_description": long_description,
+    "long_description_content_type": "text/x-rst",
     "package_dir": {"pycola3": "pycola3"},
     "packages": find_namespace_packages(),
     "classifiers": [
