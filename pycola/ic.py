@@ -26,73 +26,81 @@ def _power_spectrum(filename):
     """
     :math:`\\vspace{-1mm}`
 
-    
+
     Self-explanatory
     """
     from scipy import interpolate
     from numpy import loadtxt
-    
-    (k_arr,p_arr)=loadtxt(filename).transpose()
-        
-    return interpolate.interp1d(k_arr,p_arr,kind='linear')
+
+    (k_arr, p_arr) = loadtxt(filename).transpose()
+
+    return interpolate.interp1d(k_arr, p_arr, kind="linear")
 
 
-
-
-def initial_positions(sx,sy,sz,sx2,sy2,sz2,cellsize,growth_factor,growth_factor_2lpt,
-                            ngrid_x,
-                            ngrid_y,
-                            ngrid_z,
-                            gridcellsize,offset=[0.0,0.0,0.0]
-                          ):
-    """ 
+def initial_positions(
+    sx,
+    sy,
+    sz,
+    sx2,
+    sy2,
+    sz2,
+    cellsize,
+    growth_factor,
+    growth_factor_2lpt,
+    ngrid_x,
+    ngrid_y,
+    ngrid_z,
+    gridcellsize,
+    offset=[0.0, 0.0, 0.0],
+):
+    """
     :math:`\\vspace{-1mm}`
 
-    Add the Lagrangian particle position to the 2LPT displacement to 
-    obtain the Eulerian position. Periodic boundary conditions are assumed. 
-    
-    
+    Add the Lagrangian particle position to the 2LPT displacement to
+    obtain the Eulerian position. Periodic boundary conditions are assumed.
+
+
     **Arguments**:
 
-    * ``sx,sy,sz`` --  3-dim NumPy arrays containing the 
-      components of the particle 
+    * ``sx,sy,sz`` --  3-dim NumPy arrays containing the
+      components of the particle
       displacements today as calculated in the ZA.
-       
-    * ``sx2,sy2,sz2`` --  3-dim NumPy arrays containing the 
-      components of the second order particle 
-      displacements today as calculated in 2LPT. 
-    
-    
+
+    * ``sx2,sy2,sz2`` --  3-dim NumPy arrays containing the
+      components of the second order particle
+      displacements today as calculated in 2LPT.
+
+
     * ``cellsize`` --  a float. The inter particle spacing in Lagrangian space.
-    
-    * ``growth_factor`` --  a float. The linear growth factor for the 
+
+    * ``growth_factor`` --  a float. The linear growth factor for the
       redshift for which the Eulerian positions are requested.
 
-    * ``growth_factor_2lpt`` --  a float. The second order growth factor for the 
+    * ``growth_factor_2lpt`` --  a float. The second order growth factor for the
       redshift for which the Eulerian positions are requested.
-    
-    * ``ngrid_x``, ``ngrid_y``, ``ngrid_z`` -- integers. The grid size 
-      of the box. Only used together with ``gridcellsize`` below to find the 
-      physical size of the box, which is needed to apply the periodic 
+
+    * ``ngrid_x``, ``ngrid_y``, ``ngrid_z`` -- integers. The grid size
+      of the box. Only used together with ``gridcellsize`` below to find the
+      physical size of the box, which is needed to apply the periodic
       boundary conditions.
-    
-    * ``gridcellsize`` -- a float. The grid spacing of the box. 
-    
-    * ``offset`` -- a list of three floats (default: ``[0.0,0.0,0.0]``). 
-      Offset the Eulerian particle positions by this amount. Useful for 
-      placing refined subregions at their proper locations inside a 
+
+    * ``gridcellsize`` -- a float. The grid spacing of the box.
+
+    * ``offset`` -- a list of three floats (default: ``[0.0,0.0,0.0]``).
+      Offset the Eulerian particle positions by this amount. Useful for
+      placing refined subregions at their proper locations inside a
       bigger box.
-    
+
     **Return**:
-    
+
     * ``(px,py,pz)`` --   a tuple, where ``p``:sub:`i`
-      is a 3-dim single precision NumPy array containing the ``i``-th 
-      component (``i`` = ``x``, ``y``, ``z``) of the particle 
+      is a 3-dim single precision NumPy array containing the ``i``-th
+      component (``i`` = ``x``, ``y``, ``z``) of the particle
       Eulerian position.
-      
+
     **Example**:
-    
-    In this example we generate the initial conditions in 2LPT, and 
+
+    In this example we generate the initial conditions in 2LPT, and
     then plot a slice through the 2LPT realization at redshift of zero.
 
         >>> from ic import ic_za,ic_2lpt,initial_positions
@@ -125,245 +133,243 @@ def initial_positions(sx,sy,sz,sx2,sy2,sz2,cellsize,growth_factor,growth_factor_
 
 
 
-    
-    
-    """ 
-    
+
+
+    """
+
     from numpy import indices
-    
-    npart_x,npart_y,npart_z=sx.shape
-    
-    px,py,pz=indices((npart_x,npart_y,npart_z),dtype='float32')
-    
-    
+
+    npart_x, npart_y, npart_z = sx.shape
+
+    px, py, pz = indices((npart_x, npart_y, npart_z), dtype="float32")
+
     px *= cellsize
     py *= cellsize
     pz *= cellsize
-    
-    px += float(ngrid_x)*gridcellsize + offset[0]
-    py += float(ngrid_y)*gridcellsize + offset[1]
-    pz += float(ngrid_z)*gridcellsize + offset[2]
-    
+
+    px += float(ngrid_x) * gridcellsize + offset[0]
+    py += float(ngrid_y) * gridcellsize + offset[1]
+    pz += float(ngrid_z) * gridcellsize + offset[2]
+
     px += sx * growth_factor
     py += sy * growth_factor
     pz += sz * growth_factor
-    
+
     px += sx2 * growth_factor_2lpt
     py += sy2 * growth_factor_2lpt
     pz += sz2 * growth_factor_2lpt
-    
-    px %= float(ngrid_x)*gridcellsize
-    py %= float(ngrid_y)*gridcellsize
-    pz %= float(ngrid_z)*gridcellsize
-    
-    
-    
-    return px,py,pz
+
+    px %= float(ngrid_x) * gridcellsize
+    py %= float(ngrid_y) * gridcellsize
+    pz %= float(ngrid_z) * gridcellsize
+
+    return px, py, pz
 
 
-
-def import_music_snapshot(hdf5_filename,boxsize,level0='09',level1=None):
-    """ 
+def import_music_snapshot(hdf5_filename, boxsize, level0="09", level1=None):
+    """
     :math:`\\vspace{-1mm}`
 
-    Import a MUSIC snapshot calculated in the ZA. 
-    
+    Import a MUSIC snapshot calculated in the ZA.
+
     **Arguments**:
 
-    * ``hdf5_filename`` --  a string. Gives the filename for the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ 
+    * ``hdf5_filename`` --  a string. Gives the filename for the `HDF5 <http://www.hdfgroup.org/HDF5/>`_
       file, which MUSIC outputs.
-       
+
     * ``boxsize`` -- a float. The size of the full simulation box in :math:`\mathrm{Mpc}/h`.
-    
-    * ``level0`` --   a two-character string (default: ``'09'``). A 
-      MUSIC level covering the whole box. With the settings below, it should 
-      equal ``levelmin`` from the MUSIC configuration file for the 
+
+    * ``level0`` --   a two-character string (default: ``'09'``). A
+      MUSIC level covering the whole box. With the settings below, it should
+      equal ``levelmin`` from the MUSIC configuration file for the
       finest such level.
-    
-    * ``level1`` --   a two-character string (default: ``None``). A fine 
-      MUSIC level covering the refined subvolume. With the settings below, it 
-      should equal ``levelmax`` from the MUSIC configuration file for 
+
+    * ``level1`` --   a two-character string (default: ``None``). A fine
+      MUSIC level covering the refined subvolume. With the settings below, it
+      should equal ``levelmax`` from the MUSIC configuration file for
       the finest such level.
-    
-    
+
+
     **Return**:
-    
+
     * if ``level1`` is ``None``: ``(sx,sy,sz)`` --   a tuple, where ``s``:sub:`i`
-      is a 3-dim single precision NumPy array containing the ``i``-th 
-      component (``i`` = ``x``, ``y``, ``z``) of the particle 
-      displacements today as calculated in the ZA. ``s``:sub:`i` are the 
+      is a 3-dim single precision NumPy array containing the ``i``-th
+      component (``i`` = ``x``, ``y``, ``z``) of the particle
+      displacements today as calculated in the ZA. ``s``:sub:`i` are the
       displacements for the ``level0`` particles.
-    
-    * if ``level1`` is not ``None``: 
+
+    * if ``level1`` is not ``None``:
       ``(sx,sy,sz,sx_zoom,sy_zoom,sz_zoom,offset)`` --   a tuple, where:
-      
-      - ``s``:sub:`i` and ``s``:sub:`i`\ ``_zoom`` are 3-dim single precision NumPy arrays containing 
-        the ``i``-th component (``i`` = ``x``, ``y``, ``z``) of the 
-        particle displacements today as calculated in the ZA. ``s``:sub:`i` are 
-        the displacements for the crude level (``level0``) particles; 
-        while ``s``:sub:`i`\ ``_zoom`` are the displacements for the fine level 
-        (``level1``) particles in the refined subvolume. 
-        
-      - ``offset`` -- a list of three integers giving the crude-grid 
+
+      - ``s``:sub:`i` and ``s``:sub:`i`\ ``_zoom`` are 3-dim single precision NumPy arrays containing
+        the ``i``-th component (``i`` = ``x``, ``y``, ``z``) of the
+        particle displacements today as calculated in the ZA. ``s``:sub:`i` are
+        the displacements for the crude level (``level0``) particles;
+        while ``s``:sub:`i`\ ``_zoom`` are the displacements for the fine level
+        (``level1``) particles in the refined subvolume.
+
+      - ``offset`` -- a list of three integers giving the crude-grid
         index coordinates of the origin of the fine grid.
-    
-    
-    .. note:: 
-       pyCOLA requires specific values for some keywords in the MUSIC 
+
+
+    .. note::
+       pyCOLA requires specific values for some keywords in the MUSIC
        configuration file. Those are::
-    
+
            zstart = 0
            align_top = yes
            use_2LPT = no
            format = generic
-    
-       Also, if ``level1`` is not ``None``, pyCOLA assumes that one 
-       uses only one (usually the finest) refinement level (``level1``) on the subvolume 
+
+       Also, if ``level1`` is not ``None``, pyCOLA assumes that one
+       uses only one (usually the finest) refinement level (``level1``) on the subvolume
        of interest. Then the following needs to hold::
-           
+
            levelmin<levelmax
            ref_extent!=1.0,1.0,1.0
-           
+
        See the included :download:`ics.conf <./ics.conf>` for an example.
-    
-    
+
+
 
     """
-    
+
     import h5py
+
     print("Starting import ...")
     ss = h5py.File(hdf5_filename, "r")
-    
-    # for some reason MUSIC pads with 4 elements the displacement arrays  
+
+    # for some reason MUSIC pads with 4 elements the displacement arrays
     # when `format = generic` in the MUSIC conf file.
     # In my checks, this did not depend on the settings for the
     # padding and overlap keywords. So, hardwiring this number...
-    
-    sx      = ss['level_0'+level0+'_DM_dx'].value[4:-4, 4:-4,  4:-4]*boxsize
-    sy      = ss['level_0'+level0+'_DM_dy'].value[4:-4, 4:-4,  4:-4]*boxsize
-    sz      = ss['level_0'+level0+'_DM_dz'].value[4:-4, 4:-4,  4:-4]*boxsize
+
+    sx = ss["level_0" + level0 + "_DM_dx"].value[4:-4, 4:-4, 4:-4] * boxsize
+    sy = ss["level_0" + level0 + "_DM_dy"].value[4:-4, 4:-4, 4:-4] * boxsize
+    sz = ss["level_0" + level0 + "_DM_dz"].value[4:-4, 4:-4, 4:-4] * boxsize
     if not (level1 is None):
-        offset=[ss['header']['grid_off_x'].value[-1],
-                                 ss['header']['grid_off_y'].value[-1],
-                                 ss['header']['grid_off_z'].value[-1]]
-        sx_zoom = ss['level_0'+level1+'_DM_dx'].value[4:-4, 4:-4,  4:-4]*boxsize
-        sy_zoom = ss['level_0'+level1+'_DM_dy'].value[4:-4, 4:-4,  4:-4]*boxsize
-        sz_zoom = ss['level_0'+level1+'_DM_dz'].value[4:-4, 4:-4,  4:-4]*boxsize
+        offset = [
+            ss["header"]["grid_off_x"].value[-1],
+            ss["header"]["grid_off_y"].value[-1],
+            ss["header"]["grid_off_z"].value[-1],
+        ]
+        sx_zoom = ss["level_0" + level1 + "_DM_dx"].value[4:-4, 4:-4, 4:-4] * boxsize
+        sy_zoom = ss["level_0" + level1 + "_DM_dy"].value[4:-4, 4:-4, 4:-4] * boxsize
+        sz_zoom = ss["level_0" + level1 + "_DM_dz"].value[4:-4, 4:-4, 4:-4] * boxsize
         del ss
         print("... done")
-        return sx, sy, sz, sx_zoom, sy_zoom, sz_zoom,offset
+        return sx, sy, sz, sx_zoom, sy_zoom, sz_zoom, offset
     else:
         del ss
         print("... done")
         return sx, sy, sz
 
 
-
-def ic_2lpt( 
-           cellsize,
-           
-           sx,
-           sy,
-           sz,
-           sx_zoom = None,
-           sy_zoom = None,
-           sz_zoom = None,
-           
-           boxsize=100.00, 
-           ngrid_x_lpt=128,ngrid_y_lpt=128,ngrid_z_lpt=128,
-
-           
-           cellsize_zoom=0,offset_zoom=None,BBox_in=None,
-           growth_2pt_calc=0.05,
-           with_4pt_rule = False,
-           factor_4pt=2.0
-           ):
-    """ 
+def ic_2lpt(
+    cellsize,
+    sx,
+    sy,
+    sz,
+    sx_zoom=None,
+    sy_zoom=None,
+    sz_zoom=None,
+    boxsize=100.00,
+    ngrid_x_lpt=128,
+    ngrid_y_lpt=128,
+    ngrid_z_lpt=128,
+    cellsize_zoom=0,
+    offset_zoom=None,
+    BBox_in=None,
+    growth_2pt_calc=0.05,
+    with_4pt_rule=False,
+    factor_4pt=2.0,
+):
+    """
     :math:`\\vspace{-1mm}`
 
-    
-    Given a set of displacements calculated in the ZA at redshift 
-    zero, find the corresponding second order displacement. Works 
+
+    Given a set of displacements calculated in the ZA at redshift
+    zero, find the corresponding second order displacement. Works
     with a single grid of particles, as well as with one refined subvolume.
-    
+
     **Arguments**:
 
     * ``cellsize`` --  a float. The inter-particle spacing in Lagrangian space.
-    
-    * ``sx,sy,sz`` --  3-dim NumPy arrays containing the 
-      components of the particle displacements today as calculated in 
-      the ZA. These particles should cover the whole box. If a refined 
-      subvolume is provided, the crude particles which reside inside 
-      that subvolume are discarded and replaced with the fine 
+
+    * ``sx,sy,sz`` --  3-dim NumPy arrays containing the
+      components of the particle displacements today as calculated in
+      the ZA. These particles should cover the whole box. If a refined
+      subvolume is provided, the crude particles which reside inside
+      that subvolume are discarded and replaced with the fine
       particles.
-       
-    * ``sx_zoom,sy_zoom,sz_zoom`` --  3-dim NumPy arrays containing the 
-      components of the particle 
+
+    * ``sx_zoom,sy_zoom,sz_zoom`` --  3-dim NumPy arrays containing the
+      components of the particle
       ZA displacements today for a refined subvolume (default: ``None``).
-    
-    * ``boxsize`` -- a float (default: ``100.0``). Gives the size of the 
+
+    * ``boxsize`` -- a float (default: ``100.0``). Gives the size of the
       simulation box in Mpc/h.
-    
-    * ``ngrid_x_lpt,ngrid_y_lpt,ngrid_z_lpt`` -- integers 
-      (default: ``128``). Provide the size of the PM grid, which the algorithm 
+
+    * ``ngrid_x_lpt,ngrid_y_lpt,ngrid_z_lpt`` -- integers
+      (default: ``128``). Provide the size of the PM grid, which the algorithm
       uses to calculate the 2LPT displacements.
-    
-    * ``cellsize_zoom`` -- a float (default: ``0``). The inter-particle 
-      spacing in Lagrangian space for the refined subvolume, if such is 
-      provided. If not, ``cellsize_zoom`` must be set to zero 
-      (default), as that is used as a check for the presence of that 
+
+    * ``cellsize_zoom`` -- a float (default: ``0``). The inter-particle
+      spacing in Lagrangian space for the refined subvolume, if such is
+      provided. If not, ``cellsize_zoom`` must be set to zero
+      (default), as that is used as a check for the presence of that
       subvolume.
-    
-    * ``offset_zoom`` -- a 3-vector of floats (default: ``None``). Gives the 
-      physical coordinates of the origin of the refinement region 
+
+    * ``offset_zoom`` -- a 3-vector of floats (default: ``None``). Gives the
+      physical coordinates of the origin of the refinement region
       relative to the the origin of the full box.
-    
-    * ``BBox_in`` -- a 3x2 array of integers (default: ``None``). It has the 
-      form ``[[i0,i1],[j0,j1],[k0,k1]]``, which gives the bounding box 
-      for the refinement region in units of the crude particles 
-      Lagrangian index. Thus, the particles with displacements 
-      ``sx|sy|sz[i0:i1,j0:j1,k0:k1]`` are replaced with the fine 
+
+    * ``BBox_in`` -- a 3x2 array of integers (default: ``None``). It has the
+      form ``[[i0,i1],[j0,j1],[k0,k1]]``, which gives the bounding box
+      for the refinement region in units of the crude particles
+      Lagrangian index. Thus, the particles with displacements
+      ``sx|sy|sz[i0:i1,j0:j1,k0:k1]`` are replaced with the fine
       particles with displacements ``sx_zoom|sy_zoom|sz_zoom``.
-    
-    * ``growth_2pt_calc`` --  a float (default: ``0.05``). The 
-      linear growth factor used internally in the 2LPT calculation. A 
-      value of 0.05 gives excellent cross-correlation between the 2LPT 
-      field returned by this function, and the 2LPT returned using the 
-      usual fft tricks. Yet, some irrelevant short-scale noise is 
-      present, which one may decide to filter out. That noise is most 
-      probably due to lack of force accuracy for too low 
-      ``growth_2pt_calc``. Experiment with this value as 
+
+    * ``growth_2pt_calc`` --  a float (default: ``0.05``). The
+      linear growth factor used internally in the 2LPT calculation. A
+      value of 0.05 gives excellent cross-correlation between the 2LPT
+      field returned by this function, and the 2LPT returned using the
+      usual fft tricks. Yet, some irrelevant short-scale noise is
+      present, which one may decide to filter out. That noise is most
+      probably due to lack of force accuracy for too low
+      ``growth_2pt_calc``. Experiment with this value as
       needed.
 
     * ``with_4pt_rule`` -- a boolean (default: ``False``). See :func:`ic.ic_2lpt_engine`.
-    
-    * ``factor_4pt`` -- a float (default: ``2.0``). See :func:`ic.ic_2lpt_engine`.
-    
-    
-    
-    **Return**:
-    
-    * If no refined subregion is supplied (indicated by 
-      ``cellsize_zoom=0``), then return:
-      
-      ``(sx2,sy2,sz2)`` --  3-dim NumPy 
-      arrays containing the components of the second order particle 
-      displacements today as calculated in 2LPT. 
 
-    * If a refined subregion is supplied (indicated by 
+    * ``factor_4pt`` -- a float (default: ``2.0``). See :func:`ic.ic_2lpt_engine`.
+
+
+
+    **Return**:
+
+    * If no refined subregion is supplied (indicated by
+      ``cellsize_zoom=0``), then return:
+
+      ``(sx2,sy2,sz2)`` --  3-dim NumPy
+      arrays containing the components of the second order particle
+      displacements today as calculated in 2LPT.
+
+    * If a refined subregion is supplied (indicated by
       ``cellsize_zoom>0``), then return:
-      
+
       ``(sx2,sy2,sz2,sx2_zoom,sy2_zoom,sz2_zoom)``
-      
-      The first three arrays are as 
-      above. The last three give the second order displacements today 
+
+      The first three arrays are as
+      above. The last three give the second order displacements today
       for the particles in the refined subvolume.
-    
+
     **Example**:
 
-    Generate a realization for the displacement field in the ZA; 
-    calculate the corresponding second order displacement field; calculate 
-    the rms displacements; then show a projection of one of the 
+    Generate a realization for the displacement field in the ZA;
+    calculate the corresponding second order displacement field; calculate
+    the rms displacements; then show a projection of one of the
     components.
 
         >>> from ic import ic_za,ic_2lpt
@@ -389,102 +395,94 @@ def ic_2lpt(
         >>> plt.imshow(sy2.mean(axis=2))
         <matplotlib.image.AxesImage object at 0x7fc4603697d0>
         >>> plt.show()
-    
-    **Algorithm**: 
-        
-    This function issues a call to :func:`ic.ic_2lpt_engine`. See the 
+
+    **Algorithm**:
+
+    This function issues a call to :func:`ic.ic_2lpt_engine`. See the
     Algorithm section of that function for details.
-    
+
     """
-    
 
-
-    #from ic import ic_2lpt_engine
-    res = ic_2lpt_engine(  
-             sx,                                                    
-             sy,                                                    
-             sz,                                                    
-             cellsize,                                                             
-                                                
-             ngrid_x_lpt,ngrid_y_lpt,ngrid_z_lpt,                        
-             boxsize/float(ngrid_x_lpt), # assumes cube
-             
-                                                                                   
-             with_2lpt=False,                                                       
-             sx2_full = None,                                       
-             sy2_full = None,                                       
-             sz2_full = None,                                       
-                                                                                   
-             cellsize_zoom = cellsize_zoom,             
-             BBox_in = BBox_in,                       
-             sx_full_zoom =  sx_zoom,              
-             sy_full_zoom =  sy_zoom,                                                 
-             sz_full_zoom =  sz_zoom,      
-             sx2_full_zoom = None,            
-             sy2_full_zoom = None,            
-             sz2_full_zoom = None,            
-                                              
-             
-             offset_zoom=offset_zoom,
-             growth_2pt_calc=growth_2pt_calc
-             )
-    if (cellsize_zoom!=0):
-        sx_,sy_,sz_,sx2,sy2,sz2,sx_zoom_,sy_zoom_,sz_zoom_,sx2_zoom,sy2_zoom,sz2_zoom =res
+    # from ic import ic_2lpt_engine
+    res = ic_2lpt_engine(
+        sx,
+        sy,
+        sz,
+        cellsize,
+        ngrid_x_lpt,
+        ngrid_y_lpt,
+        ngrid_z_lpt,
+        boxsize / float(ngrid_x_lpt),  # assumes cube
+        with_2lpt=False,
+        sx2_full=None,
+        sy2_full=None,
+        sz2_full=None,
+        cellsize_zoom=cellsize_zoom,
+        BBox_in=BBox_in,
+        sx_full_zoom=sx_zoom,
+        sy_full_zoom=sy_zoom,
+        sz_full_zoom=sz_zoom,
+        sx2_full_zoom=None,
+        sy2_full_zoom=None,
+        sz2_full_zoom=None,
+        offset_zoom=offset_zoom,
+        growth_2pt_calc=growth_2pt_calc,
+    )
+    if cellsize_zoom != 0:
+        (
+            sx_,
+            sy_,
+            sz_,
+            sx2,
+            sy2,
+            sz2,
+            sx_zoom_,
+            sy_zoom_,
+            sz_zoom_,
+            sx2_zoom,
+            sy2_zoom,
+            sz2_zoom,
+        ) = res
     else:
-        sx_,sy_,sz_,sx2,sy2,sz2 =res
-    
-    del sx_,sy_,sz_ #These have higher order corrections unlike the original *_full arrays, which are 'exact'. So, discard.
-    if (cellsize_zoom!=0):
-            del sx_zoom_,sy_zoom_,sz_zoom_
-            return sx2,sy2,sz2, sx2_zoom,sy2_zoom,sz2_zoom
-    return  sx2,sy2,sz2
+        sx_, sy_, sz_, sx2, sy2, sz2 = res
+
+    del (
+        sx_,
+        sy_,
+        sz_,
+    )  # These have higher order corrections unlike the original *_full arrays, which are 'exact'. So, discard.
+    if cellsize_zoom != 0:
+        del sx_zoom_, sy_zoom_, sz_zoom_
+        return sx2, sy2, sz2, sx2_zoom, sy2_zoom, sz2_zoom
+    return sx2, sy2, sz2
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def ic_2lpt_engine(                                       
-         sx_full,
-         sy_full,
-         sz_full,
-         cellsize,
-         
-         
-         ngrid_x,ngrid_y,ngrid_z,
-         gridcellsize,
-         
-         growth_2pt_calc=0.05,
-         
-         with_4pt_rule = False,
-         factor_4pt=2.0,
-         
-         with_2lpt=False,
-         sx2_full = None,
-         sy2_full = None,
-         sz2_full = None,
-         
-         cellsize_zoom = 0,
-         BBox_in = None,
-         sx_full_zoom =  None,
-         sy_full_zoom =  None,
-         sz_full_zoom =  None,
-         sx2_full_zoom = None,
-         sy2_full_zoom = None,
-         sz2_full_zoom = None,
-         
-         
-         offset_zoom=None):
+def ic_2lpt_engine(
+    sx_full,
+    sy_full,
+    sz_full,
+    cellsize,
+    ngrid_x,
+    ngrid_y,
+    ngrid_z,
+    gridcellsize,
+    growth_2pt_calc=0.05,
+    with_4pt_rule=False,
+    factor_4pt=2.0,
+    with_2lpt=False,
+    sx2_full=None,
+    sy2_full=None,
+    sz2_full=None,
+    cellsize_zoom=0,
+    BBox_in=None,
+    sx_full_zoom=None,
+    sy_full_zoom=None,
+    sz_full_zoom=None,
+    sx2_full_zoom=None,
+    sy2_full_zoom=None,
+    sz2_full_zoom=None,
+    offset_zoom=None,
+):
     r""" 
     :math:`\vspace{-1mm}`
 
@@ -657,472 +655,674 @@ def ic_2lpt_engine(
        inclusion in this code is mostly done as an illustration.
        
     """
-             
-    
-    
-    
-    
-    from numpy import float64,float32
-    
-    if (cellsize_zoom!=0):
-        cellsize_zoom=float32(cellsize_zoom)
-        offset_zoom=offset_zoom.astype('float32')
-    
-    
+
+    from numpy import float64, float32
+
+    if cellsize_zoom != 0:
+        cellsize_zoom = float32(cellsize_zoom)
+        offset_zoom = offset_zoom.astype("float32")
+
     npart_x, npart_y, npart_z = sx_full.shape
-    if (cellsize_zoom!=0):
+    if cellsize_zoom != 0:
         npart_x_zoom, npart_y_zoom, npart_z_zoom = sx_full_zoom.shape
-  
 
-    from numpy import zeros,array
-    
-    
-    sx =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-    sy =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-    sz =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-    
-    sx_minus =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-    sy_minus =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-    sz_minus =  zeros((npart_x,npart_y,npart_z),dtype='float32')
+    from numpy import zeros, array
 
-    if (cellsize_zoom!=0):
-        sx_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-        sy_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-        sz_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-    
-        sx_minus_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-        sy_minus_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-        sz_minus_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
+    sx = zeros((npart_x, npart_y, npart_z), dtype="float32")
+    sy = zeros((npart_x, npart_y, npart_z), dtype="float32")
+    sz = zeros((npart_x, npart_y, npart_z), dtype="float32")
 
-    if (with_4pt_rule):
-        sx_4pt_minus =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-        sy_4pt_minus =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-        sz_4pt_minus =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-        
-        sx_4pt =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-        sy_4pt =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-        sz_4pt =  zeros((npart_x,npart_y,npart_z),dtype='float32')
-    
-        if (cellsize_zoom!=0): 
-            sx_4pt_minus_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-            sy_4pt_minus_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-            sz_4pt_minus_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-        
-            sx_4pt_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-            sy_4pt_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
-            sz_4pt_zoom =  zeros((npart_x_zoom,npart_y_zoom,npart_z_zoom),dtype='float32')
+    sx_minus = zeros((npart_x, npart_y, npart_z), dtype="float32")
+    sy_minus = zeros((npart_x, npart_y, npart_z), dtype="float32")
+    sz_minus = zeros((npart_x, npart_y, npart_z), dtype="float32")
+
+    if cellsize_zoom != 0:
+        sx_zoom = zeros((npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32")
+        sy_zoom = zeros((npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32")
+        sz_zoom = zeros((npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32")
+
+        sx_minus_zoom = zeros(
+            (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+        )
+        sy_minus_zoom = zeros(
+            (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+        )
+        sz_minus_zoom = zeros(
+            (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+        )
+
+    if with_4pt_rule:
+        sx_4pt_minus = zeros((npart_x, npart_y, npart_z), dtype="float32")
+        sy_4pt_minus = zeros((npart_x, npart_y, npart_z), dtype="float32")
+        sz_4pt_minus = zeros((npart_x, npart_y, npart_z), dtype="float32")
+
+        sx_4pt = zeros((npart_x, npart_y, npart_z), dtype="float32")
+        sy_4pt = zeros((npart_x, npart_y, npart_z), dtype="float32")
+        sz_4pt = zeros((npart_x, npart_y, npart_z), dtype="float32")
+
+        if cellsize_zoom != 0:
+            sx_4pt_minus_zoom = zeros(
+                (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+            )
+            sy_4pt_minus_zoom = zeros(
+                (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+            )
+            sz_4pt_minus_zoom = zeros(
+                (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+            )
+
+            sx_4pt_zoom = zeros(
+                (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+            )
+            sy_4pt_zoom = zeros(
+                (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+            )
+            sz_4pt_zoom = zeros(
+                (npart_x_zoom, npart_y_zoom, npart_z_zoom), dtype="float32"
+            )
     else:
-        sx_4pt_minus =  0.0 
-        sy_4pt_minus =  0.0
-        sz_4pt_minus =  0.0
-        
-        sx_4pt =  0.0
-        sy_4pt =  0.0
-        sz_4pt =  0.0
-    
-        if (cellsize_zoom!=0): 
-            sx_4pt_minus_zoom =  0.0
-            sy_4pt_minus_zoom =  0.0
-            sz_4pt_minus_zoom =  0.0
-        
-            sx_4pt_zoom =  0.0
-            sy_4pt_zoom =  0.0
-            sz_4pt_zoom =  0.0
-    
-    
-    from potential import  get_phi, initialize_density
+        sx_4pt_minus = 0.0
+        sy_4pt_minus = 0.0
+        sz_4pt_minus = 0.0
+
+        sx_4pt = 0.0
+        sy_4pt = 0.0
+        sz_4pt = 0.0
+
+        if cellsize_zoom != 0:
+            sx_4pt_minus_zoom = 0.0
+            sy_4pt_minus_zoom = 0.0
+            sz_4pt_minus_zoom = 0.0
+
+            sx_4pt_zoom = 0.0
+            sy_4pt_zoom = 0.0
+            sz_4pt_zoom = 0.0
+
+    from potential import get_phi, initialize_density
     from cic import CICDeposit_3
     from acceleration import grad_phi
-    
-    
 
-###
-    density,den_k,den_fft,phi_fft  = initialize_density(ngrid_x,ngrid_y,ngrid_z)
-    density.fill(0.0)   
-    Om=0.274
-    dd= Om**(1./143.) # this is a good enough approximation at early times and is ~0.95
+    ###
+    density, den_k, den_fft, phi_fft = initialize_density(ngrid_x, ngrid_y, ngrid_z)
+    density.fill(0.0)
+    Om = 0.274
+    dd = Om ** (
+        1.0 / 143.0
+    )  # this is a good enough approximation at early times and is ~0.95
     if with_2lpt:
-       cc=3./10.*dd
-       L2=growth_2pt_calc*growth_2pt_calc/dd
+        cc = 3.0 / 10.0 * dd
+        L2 = growth_2pt_calc * growth_2pt_calc / dd
     else:
-       cc=3./7.*dd
-       L2=0.0
-    
-    gridcellsize=float32(gridcellsize)
-    growth_2pt_calc=float32(growth_2pt_calc)
-    L2=float32(L2)
-    
-    offset=array([0.0,0.0,0.0],dtype='float32')
-    if (cellsize_zoom==0):
-        BBox_in=array([[0,0],[0,0],[0,0]],dtype='int32')
+        cc = 3.0 / 7.0 * dd
+        L2 = 0.0
+
+    gridcellsize = float32(gridcellsize)
+    growth_2pt_calc = float32(growth_2pt_calc)
+    L2 = float32(L2)
+
+    offset = array([0.0, 0.0, 0.0], dtype="float32")
+    if cellsize_zoom == 0:
+        BBox_in = array([[0, 0], [0, 0], [0, 0]], dtype="int32")
     if not with_2lpt:
-        sx2_full = zeros((0,0,0),dtype='float32')
-        sy2_full = zeros((0,0,0),dtype='float32')
-        sz2_full = zeros((0,0,0),dtype='float32')
-        
-    CICDeposit_3(         sx_full,
-                          sy_full,
-                          sz_full,
-                          sx2_full,
-                          sy2_full,
-                          sz2_full,
-                          density,
-                          
-                          cellsize,gridcellsize,
-                          1,
-                          growth_2pt_calc,
-                          L2,
-                          
-                          BBox_in,
-                          offset,1)
-                          
-    if (cellsize_zoom!=0):
-        CICDeposit_3(sx_full_zoom,
-                          sy_full_zoom,
-                          sz_full_zoom,
-                          sx2_full_zoom,
-                          sy2_full_zoom,
-                          sz2_full_zoom,
-                          density,
-                          
-                          cellsize_zoom,gridcellsize,
-                          1,
-                          growth_2pt_calc,
-                          L2,
+        sx2_full = zeros((0, 0, 0), dtype="float32")
+        sy2_full = zeros((0, 0, 0), dtype="float32")
+        sz2_full = zeros((0, 0, 0), dtype="float32")
 
-                          array([[0,0],[0,0],[0,0]],dtype='int32'),
-                          offset_zoom,1)
+    CICDeposit_3(
+        sx_full,
+        sy_full,
+        sz_full,
+        sx2_full,
+        sy2_full,
+        sz2_full,
+        density,
+        cellsize,
+        gridcellsize,
+        1,
+        growth_2pt_calc,
+        L2,
+        BBox_in,
+        offset,
+        1,
+    )
 
+    if cellsize_zoom != 0:
+        CICDeposit_3(
+            sx_full_zoom,
+            sy_full_zoom,
+            sz_full_zoom,
+            sx2_full_zoom,
+            sy2_full_zoom,
+            sz2_full_zoom,
+            density,
+            cellsize_zoom,
+            gridcellsize,
+            1,
+            growth_2pt_calc,
+            L2,
+            array([[0, 0], [0, 0], [0, 0]], dtype="int32"),
+            offset_zoom,
+            1,
+        )
 
     density -= 1.0
-    
-    #print "den ic",density.mean(dtype=float64)
-    if (with_4pt_rule):
-        density *= -0.5/growth_2pt_calc/(1.0-1.0/factor_4pt/factor_4pt)
+
+    # print "den ic",density.mean(dtype=float64)
+    if with_4pt_rule:
+        density *= -0.5 / growth_2pt_calc / (1.0 - 1.0 / factor_4pt / factor_4pt)
     else:
-        density *= -0.5/growth_2pt_calc
-    
-    get_phi(density, den_k, den_fft, phi_fft, ngrid_x,ngrid_y,ngrid_z, gridcellsize)
-    phi = density # density now holds phi, so rename it
-    grad_phi( sx_full, sy_full, sz_full,sx2_full, sy2_full, sz2_full, sx, sy, sz, npart_x,npart_y,npart_z, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize,gridcellsize, 
-                growth_2pt_calc,
-                L2,offset)
-                
-    if (cellsize_zoom!=0):
-        grad_phi( sx_full_zoom, sy_full_zoom, sz_full_zoom,sx2_full_zoom, sy2_full_zoom, sz2_full_zoom, sx_zoom, sy_zoom, sz_zoom, npart_x_zoom,npart_y_zoom,npart_z_zoom, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize_zoom,gridcellsize, 
-                growth_2pt_calc,
-                L2,offset_zoom)
+        density *= -0.5 / growth_2pt_calc
 
-                         
-#######
-    density.fill(0.0)   
+    get_phi(density, den_k, den_fft, phi_fft, ngrid_x, ngrid_y, ngrid_z, gridcellsize)
+    phi = density  # density now holds phi, so rename it
+    grad_phi(
+        sx_full,
+        sy_full,
+        sz_full,
+        sx2_full,
+        sy2_full,
+        sz2_full,
+        sx,
+        sy,
+        sz,
+        npart_x,
+        npart_y,
+        npart_z,
+        phi,
+        ngrid_x,
+        ngrid_y,
+        ngrid_z,
+        cellsize,
+        gridcellsize,
+        growth_2pt_calc,
+        L2,
+        offset,
+    )
 
-                          
+    if cellsize_zoom != 0:
+        grad_phi(
+            sx_full_zoom,
+            sy_full_zoom,
+            sz_full_zoom,
+            sx2_full_zoom,
+            sy2_full_zoom,
+            sz2_full_zoom,
+            sx_zoom,
+            sy_zoom,
+            sz_zoom,
+            npart_x_zoom,
+            npart_y_zoom,
+            npart_z_zoom,
+            phi,
+            ngrid_x,
+            ngrid_y,
+            ngrid_z,
+            cellsize_zoom,
+            gridcellsize,
+            growth_2pt_calc,
+            L2,
+            offset_zoom,
+        )
 
-    CICDeposit_3(sx_full,
-                          sy_full,
-                          sz_full,
-                          sx2_full,
-                          sy2_full,
-                          sz2_full,
-                          density,
-                          
-                          cellsize,gridcellsize,
-                          1,
-                         -growth_2pt_calc,
-                          L2,
-                          BBox_in,
-                          offset,1)
+    #######
+    density.fill(0.0)
 
-    if (cellsize_zoom!=0):
-        CICDeposit_3(sx_full_zoom,                                             
-                          sy_full_zoom,                                             
-                          sz_full_zoom,                                             
-                          sx2_full_zoom,                                            
-                          sy2_full_zoom,                                            
-                          sz2_full_zoom,                                            
-                          density,                                               
-                          
-                          cellsize_zoom,gridcellsize,                                                                                
-                          1,                                                     
-                         -growth_2pt_calc,                                    
-                          L2,        
-                          
-                          array([[0,0],[0,0],[0,0]],dtype='int32'),
-                          offset_zoom,1)
-                                                                                 
-                                                                                 
-    density -= 1.0  
-    
-    #print "den ic",density.mean(dtype=float64)
-    if (with_4pt_rule):
-        density *= -0.5/growth_2pt_calc/(1.0-1.0/factor_4pt/factor_4pt)                                        
+    CICDeposit_3(
+        sx_full,
+        sy_full,
+        sz_full,
+        sx2_full,
+        sy2_full,
+        sz2_full,
+        density,
+        cellsize,
+        gridcellsize,
+        1,
+        -growth_2pt_calc,
+        L2,
+        BBox_in,
+        offset,
+        1,
+    )
+
+    if cellsize_zoom != 0:
+        CICDeposit_3(
+            sx_full_zoom,
+            sy_full_zoom,
+            sz_full_zoom,
+            sx2_full_zoom,
+            sy2_full_zoom,
+            sz2_full_zoom,
+            density,
+            cellsize_zoom,
+            gridcellsize,
+            1,
+            -growth_2pt_calc,
+            L2,
+            array([[0, 0], [0, 0], [0, 0]], dtype="int32"),
+            offset_zoom,
+            1,
+        )
+
+    density -= 1.0
+
+    # print "den ic",density.mean(dtype=float64)
+    if with_4pt_rule:
+        density *= -0.5 / growth_2pt_calc / (1.0 - 1.0 / factor_4pt / factor_4pt)
     else:
-        density *= -0.5/growth_2pt_calc
+        density *= -0.5 / growth_2pt_calc
 
-    
-    get_phi(density, den_k, den_fft, phi_fft, ngrid_x,ngrid_y,ngrid_z, gridcellsize)
-    phi = density # density now holds phi, so rename it
+    get_phi(density, den_k, den_fft, phi_fft, ngrid_x, ngrid_y, ngrid_z, gridcellsize)
+    phi = density  # density now holds phi, so rename it
 
-    grad_phi( sx_full, sy_full, sz_full,sx2_full, sy2_full, sz2_full, sx_minus, sy_minus, sz_minus, npart_x,npart_y,npart_z, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize,gridcellsize, 
-               -growth_2pt_calc,
-                L2,offset)
-    if (cellsize_zoom!=0):
-        grad_phi( sx_full_zoom, sy_full_zoom, sz_full_zoom,sx2_full_zoom, sy2_full_zoom, sz2_full_zoom, sx_minus_zoom, sy_minus_zoom, sz_minus_zoom, npart_x_zoom,npart_y_zoom,npart_z_zoom, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize_zoom,gridcellsize, 
-               -growth_2pt_calc,
-                L2,offset_zoom)
+    grad_phi(
+        sx_full,
+        sy_full,
+        sz_full,
+        sx2_full,
+        sy2_full,
+        sz2_full,
+        sx_minus,
+        sy_minus,
+        sz_minus,
+        npart_x,
+        npart_y,
+        npart_z,
+        phi,
+        ngrid_x,
+        ngrid_y,
+        ngrid_z,
+        cellsize,
+        gridcellsize,
+        -growth_2pt_calc,
+        L2,
+        offset,
+    )
+    if cellsize_zoom != 0:
+        grad_phi(
+            sx_full_zoom,
+            sy_full_zoom,
+            sz_full_zoom,
+            sx2_full_zoom,
+            sy2_full_zoom,
+            sz2_full_zoom,
+            sx_minus_zoom,
+            sy_minus_zoom,
+            sz_minus_zoom,
+            npart_x_zoom,
+            npart_y_zoom,
+            npart_z_zoom,
+            phi,
+            ngrid_x,
+            ngrid_y,
+            ngrid_z,
+            cellsize_zoom,
+            gridcellsize,
+            -growth_2pt_calc,
+            L2,
+            offset_zoom,
+        )
 
-###### 
-###### 
-###### Two more force evaluations in the case of a 4pt rule.
-###### 
-###### 
+    ######
+    ######
+    ###### Two more force evaluations in the case of a 4pt rule.
+    ######
+    ######
 
-    if (with_4pt_rule):
-        density.fill(0.0)   
-        CICDeposit_3(sx_full,
-                          sy_full,
-                          sz_full,
-                          sx2_full,
-                          sy2_full,
-                          sz2_full,
-                          density,
-                          
-                          cellsize,gridcellsize,
-                          1,
-                          growth_2pt_calc*factor_4pt,
-                          L2*factor_4pt*factor_4pt,
-                          
-                          BBox_in,
-                          offset,1)
-        if (cellsize_zoom!=0):
-            CICDeposit_3(sx_full_zoom,
-                          sy_full_zoom,
-                          sz_full_zoom,
-                          sx2_full_zoom,
-                          sy2_full_zoom,
-                          sz2_full_zoom,
-                          density,
-                          
-                          cellsize_zoom,gridcellsize,
-                          1,
-                          growth_2pt_calc*factor_4pt,
-                          L2*factor_4pt*factor_4pt,
-
-                          array([[0,0],[0,0],[0,0]],dtype='int32'),
-                          offset_zoom,1)
-
+    if with_4pt_rule:
+        density.fill(0.0)
+        CICDeposit_3(
+            sx_full,
+            sy_full,
+            sz_full,
+            sx2_full,
+            sy2_full,
+            sz2_full,
+            density,
+            cellsize,
+            gridcellsize,
+            1,
+            growth_2pt_calc * factor_4pt,
+            L2 * factor_4pt * factor_4pt,
+            BBox_in,
+            offset,
+            1,
+        )
+        if cellsize_zoom != 0:
+            CICDeposit_3(
+                sx_full_zoom,
+                sy_full_zoom,
+                sz_full_zoom,
+                sx2_full_zoom,
+                sy2_full_zoom,
+                sz2_full_zoom,
+                density,
+                cellsize_zoom,
+                gridcellsize,
+                1,
+                growth_2pt_calc * factor_4pt,
+                L2 * factor_4pt * factor_4pt,
+                array([[0, 0], [0, 0], [0, 0]], dtype="int32"),
+                offset_zoom,
+                1,
+            )
 
         density -= 1.0
-    
-    #print "den ic",density.mean(dtype=float64)
-    
-        density *= -0.5/growth_2pt_calc/(1.0-1.0/factor_4pt/factor_4pt)*(-1.0/factor_4pt**3)
 
-    
-        get_phi(density, den_k, den_fft, phi_fft, ngrid_x,ngrid_y,ngrid_z, gridcellsize)
-        phi = density # density now holds phi, so rename it
-        grad_phi( sx_full, sy_full, sz_full,sx2_full, sy2_full, sz2_full, sx_4pt, sy_4pt, sz_4pt, npart_x,npart_y,npart_z, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize,gridcellsize, 
-                growth_2pt_calc*factor_4pt,
-                L2*factor_4pt*factor_4pt,offset)
-        if (cellsize_zoom!=0):
-            grad_phi( sx_full_zoom, sy_full_zoom, sz_full_zoom,sx2_full_zoom, sy2_full_zoom, sz2_full_zoom, sx_4pt_zoom, sy_4pt_zoom, sz_4pt_zoom, npart_x_zoom,npart_y_zoom,npart_z_zoom, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize_zoom,gridcellsize, 
-                growth_2pt_calc*factor_4pt,
-                L2*factor_4pt*factor_4pt,offset_zoom)
+        # print "den ic",density.mean(dtype=float64)
 
-                         
-#######
-        density.fill(0.0)   
+        density *= (
+            -0.5
+            / growth_2pt_calc
+            / (1.0 - 1.0 / factor_4pt / factor_4pt)
+            * (-1.0 / factor_4pt ** 3)
+        )
 
-                          
+        get_phi(
+            density, den_k, den_fft, phi_fft, ngrid_x, ngrid_y, ngrid_z, gridcellsize
+        )
+        phi = density  # density now holds phi, so rename it
+        grad_phi(
+            sx_full,
+            sy_full,
+            sz_full,
+            sx2_full,
+            sy2_full,
+            sz2_full,
+            sx_4pt,
+            sy_4pt,
+            sz_4pt,
+            npart_x,
+            npart_y,
+            npart_z,
+            phi,
+            ngrid_x,
+            ngrid_y,
+            ngrid_z,
+            cellsize,
+            gridcellsize,
+            growth_2pt_calc * factor_4pt,
+            L2 * factor_4pt * factor_4pt,
+            offset,
+        )
+        if cellsize_zoom != 0:
+            grad_phi(
+                sx_full_zoom,
+                sy_full_zoom,
+                sz_full_zoom,
+                sx2_full_zoom,
+                sy2_full_zoom,
+                sz2_full_zoom,
+                sx_4pt_zoom,
+                sy_4pt_zoom,
+                sz_4pt_zoom,
+                npart_x_zoom,
+                npart_y_zoom,
+                npart_z_zoom,
+                phi,
+                ngrid_x,
+                ngrid_y,
+                ngrid_z,
+                cellsize_zoom,
+                gridcellsize,
+                growth_2pt_calc * factor_4pt,
+                L2 * factor_4pt * factor_4pt,
+                offset_zoom,
+            )
 
-        CICDeposit_3(sx_full,
-                          sy_full,
-                          sz_full,
-                          sx2_full,
-                          sy2_full,
-                          sz2_full,
-                          density,
-                          
-                          cellsize,gridcellsize,
-                          1,
-                         -growth_2pt_calc*factor_4pt,
-                          L2*factor_4pt*factor_4pt,
-                          BBox_in,
-                          offset,1)
-        if (cellsize_zoom!=0):
-            CICDeposit_3(sx_full_zoom,                                             
-                          sy_full_zoom,                                             
-                          sz_full_zoom,                                             
-                          sx2_full_zoom,                                            
-                          sy2_full_zoom,                                            
-                          sz2_full_zoom,                                            
-                          density,                                               
-                          
-                          cellsize_zoom,gridcellsize,                                                                                
-                          1,                                                     
-                         -growth_2pt_calc*factor_4pt,                                    
-                          L2*factor_4pt*factor_4pt,        
-                          
-                          array([[0,0],[0,0],[0,0]],dtype='int32'),
-                          offset_zoom,1)
-                                                                                 
-                                                                                 
-        density -= 1.0  
-                     
-        density *= -0.5/growth_2pt_calc/(1.0-1.0/factor_4pt/factor_4pt)*(-1.0/factor_4pt**3)                                    
+        #######
+        density.fill(0.0)
 
+        CICDeposit_3(
+            sx_full,
+            sy_full,
+            sz_full,
+            sx2_full,
+            sy2_full,
+            sz2_full,
+            density,
+            cellsize,
+            gridcellsize,
+            1,
+            -growth_2pt_calc * factor_4pt,
+            L2 * factor_4pt * factor_4pt,
+            BBox_in,
+            offset,
+            1,
+        )
+        if cellsize_zoom != 0:
+            CICDeposit_3(
+                sx_full_zoom,
+                sy_full_zoom,
+                sz_full_zoom,
+                sx2_full_zoom,
+                sy2_full_zoom,
+                sz2_full_zoom,
+                density,
+                cellsize_zoom,
+                gridcellsize,
+                1,
+                -growth_2pt_calc * factor_4pt,
+                L2 * factor_4pt * factor_4pt,
+                array([[0, 0], [0, 0], [0, 0]], dtype="int32"),
+                offset_zoom,
+                1,
+            )
 
-    
-        get_phi(density, den_k, den_fft, phi_fft, ngrid_x,ngrid_y,ngrid_z, gridcellsize)
-        phi = density # density now holds phi, so rename it
+        density -= 1.0
 
-        grad_phi( sx_full, sy_full, sz_full,sx2_full, sy2_full, sz2_full, sx_4pt_minus, sy_4pt_minus, sz_4pt_minus, npart_x,npart_y,npart_z, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize,gridcellsize, 
-               -growth_2pt_calc*factor_4pt,
-                L2*factor_4pt*factor_4pt,offset)
-        if (cellsize_zoom!=0):
-            grad_phi( sx_full_zoom, sy_full_zoom, sz_full_zoom,sx2_full_zoom, sy2_full_zoom, sz2_full_zoom, sx_4pt_minus_zoom, sy_4pt_minus_zoom, sz_4pt_minus_zoom, npart_x_zoom,npart_y_zoom,npart_z_zoom, phi,
-                ngrid_x,ngrid_y,ngrid_z,cellsize_zoom,gridcellsize, 
-               -growth_2pt_calc*factor_4pt,
-                L2*factor_4pt*factor_4pt,offset_zoom)
+        density *= (
+            -0.5
+            / growth_2pt_calc
+            / (1.0 - 1.0 / factor_4pt / factor_4pt)
+            * (-1.0 / factor_4pt ** 3)
+        )
 
-###### 
-###### 
-###### Done with the two more force evaluations in the case of a 4pt rule.
-###### 
-###### 
+        get_phi(
+            density, den_k, den_fft, phi_fft, ngrid_x, ngrid_y, ngrid_z, gridcellsize
+        )
+        phi = density  # density now holds phi, so rename it
 
-    del density,den_k, den_fft,phi,phi_fft
-    
-    
-    if (cellsize_zoom!=0): # the variables *_4pt* (except factor_4pt) are init'd to zero if 4pt rule is not requested
-        sx2_zoom = (sx_zoom+sx_minus_zoom+(sx_4pt_zoom+sx_4pt_minus_zoom)/factor_4pt)*cc/growth_2pt_calc
-        sy2_zoom = (sy_zoom+sy_minus_zoom+(sy_4pt_zoom+sy_4pt_minus_zoom)/factor_4pt)*cc/growth_2pt_calc
-        sz2_zoom = (sz_zoom+sz_minus_zoom+(sz_4pt_zoom+sz_4pt_minus_zoom)/factor_4pt)*cc/growth_2pt_calc
-    
-        sx_zoom+=sx_4pt_zoom - (sx_minus_zoom + sx_4pt_minus_zoom)
-        sy_zoom+=sy_4pt_zoom - (sy_minus_zoom + sy_4pt_minus_zoom)
-        sz_zoom+=sz_4pt_zoom - (sz_minus_zoom + sz_4pt_minus_zoom)
-    
-    sx2 = (sx+sx_minus+(sx_4pt+sx_4pt_minus)/factor_4pt)*cc/growth_2pt_calc 
-    sy2 = (sy+sy_minus+(sy_4pt+sy_4pt_minus)/factor_4pt)*cc/growth_2pt_calc
-    sz2 = (sz+sz_minus+(sz_4pt+sz_4pt_minus)/factor_4pt)*cc/growth_2pt_calc
-    
-    sx+=sx_4pt - (sx_minus + sx_4pt_minus) 
-    sy+=sy_4pt - (sy_minus + sy_4pt_minus)
-    sz+=sz_4pt - (sz_minus + sz_4pt_minus)
-    
-    del sx_minus,sy_minus,sz_minus
-    if (cellsize_zoom!=0):
-        del sx_minus_zoom,sy_minus_zoom,sz_minus_zoom
-    if (with_4pt_rule):
-        del sx_4pt_minus,  sy_4pt_minus,  sz_4pt_minus
-        if (cellsize_zoom!=0):    
-            del sx_4pt_minus_zoom,sy_4pt_minus_zoom,sz_4pt_minus_zoom
-        del sx_4pt,  sy_4pt,  sz_4pt
-        if (cellsize_zoom!=0):
-            del sx_4pt_zoom,sy_4pt_zoom,sz_4pt_zoom
-    
+        grad_phi(
+            sx_full,
+            sy_full,
+            sz_full,
+            sx2_full,
+            sy2_full,
+            sz2_full,
+            sx_4pt_minus,
+            sy_4pt_minus,
+            sz_4pt_minus,
+            npart_x,
+            npart_y,
+            npart_z,
+            phi,
+            ngrid_x,
+            ngrid_y,
+            ngrid_z,
+            cellsize,
+            gridcellsize,
+            -growth_2pt_calc * factor_4pt,
+            L2 * factor_4pt * factor_4pt,
+            offset,
+        )
+        if cellsize_zoom != 0:
+            grad_phi(
+                sx_full_zoom,
+                sy_full_zoom,
+                sz_full_zoom,
+                sx2_full_zoom,
+                sy2_full_zoom,
+                sz2_full_zoom,
+                sx_4pt_minus_zoom,
+                sy_4pt_minus_zoom,
+                sz_4pt_minus_zoom,
+                npart_x_zoom,
+                npart_y_zoom,
+                npart_z_zoom,
+                phi,
+                ngrid_x,
+                ngrid_y,
+                ngrid_z,
+                cellsize_zoom,
+                gridcellsize,
+                -growth_2pt_calc * factor_4pt,
+                L2 * factor_4pt * factor_4pt,
+                offset_zoom,
+            )
+
+    ######
+    ######
+    ###### Done with the two more force evaluations in the case of a 4pt rule.
+    ######
+    ######
+
+    del density, den_k, den_fft, phi, phi_fft
+
+    if (
+        cellsize_zoom != 0
+    ):  # the variables *_4pt* (except factor_4pt) are init'd to zero if 4pt rule is not requested
+        sx2_zoom = (
+            (sx_zoom + sx_minus_zoom + (sx_4pt_zoom + sx_4pt_minus_zoom) / factor_4pt)
+            * cc
+            / growth_2pt_calc
+        )
+        sy2_zoom = (
+            (sy_zoom + sy_minus_zoom + (sy_4pt_zoom + sy_4pt_minus_zoom) / factor_4pt)
+            * cc
+            / growth_2pt_calc
+        )
+        sz2_zoom = (
+            (sz_zoom + sz_minus_zoom + (sz_4pt_zoom + sz_4pt_minus_zoom) / factor_4pt)
+            * cc
+            / growth_2pt_calc
+        )
+
+        sx_zoom += sx_4pt_zoom - (sx_minus_zoom + sx_4pt_minus_zoom)
+        sy_zoom += sy_4pt_zoom - (sy_minus_zoom + sy_4pt_minus_zoom)
+        sz_zoom += sz_4pt_zoom - (sz_minus_zoom + sz_4pt_minus_zoom)
+
+    sx2 = (sx + sx_minus + (sx_4pt + sx_4pt_minus) / factor_4pt) * cc / growth_2pt_calc
+    sy2 = (sy + sy_minus + (sy_4pt + sy_4pt_minus) / factor_4pt) * cc / growth_2pt_calc
+    sz2 = (sz + sz_minus + (sz_4pt + sz_4pt_minus) / factor_4pt) * cc / growth_2pt_calc
+
+    sx += sx_4pt - (sx_minus + sx_4pt_minus)
+    sy += sy_4pt - (sy_minus + sy_4pt_minus)
+    sz += sz_4pt - (sz_minus + sz_4pt_minus)
+
+    del sx_minus, sy_minus, sz_minus
+    if cellsize_zoom != 0:
+        del sx_minus_zoom, sy_minus_zoom, sz_minus_zoom
+    if with_4pt_rule:
+        del sx_4pt_minus, sy_4pt_minus, sz_4pt_minus
+        if cellsize_zoom != 0:
+            del sx_4pt_minus_zoom, sy_4pt_minus_zoom, sz_4pt_minus_zoom
+        del sx_4pt, sy_4pt, sz_4pt
+        if cellsize_zoom != 0:
+            del sx_4pt_zoom, sy_4pt_zoom, sz_4pt_zoom
+
     # The lines below fix the box-size irrotational condition for periodic boxes
-    
-    #Mx=sx.mean(axis=0,dtype=float64)
-    #My=sy.mean(axis=1,dtype=float64)
-    #Mz=sz.mean(axis=2,dtype=float64)
-    #for i in range(npart_x):
-        #sx[i,:,:]-=Mx
-    #for i in range(npart_y):
-        #sy[:,i,:]-=My
-    #for i in range(npart_z):
-        #sz[:,:,i]-=Mz
 
-    #del Mx,My,Mz
-    #Mx=sx2.mean(axis=0,dtype=float64)
-    #My=sy2.mean(axis=1,dtype=float64)
-    #Mz=sz2.mean(axis=2,dtype=float64)
-    #for i in range(npart_x):
-        #sx2[i,:,:]-=Mx
-    #for i in range(npart_y):
-        #sy2[:,i,:]-=My
-    #for i in range(npart_z):
-        #sz2[:,:,i]-=Mz
+    # Mx=sx.mean(axis=0,dtype=float64)
+    # My=sy.mean(axis=1,dtype=float64)
+    # Mz=sz.mean(axis=2,dtype=float64)
+    # for i in range(npart_x):
+    # sx[i,:,:]-=Mx
+    # for i in range(npart_y):
+    # sy[:,i,:]-=My
+    # for i in range(npart_z):
+    # sz[:,:,i]-=Mz
 
-    #del Mx,My,Mz
-    #Mx=sx_zoom.mean(axis=0,dtype=float64)
-    #My=sy_zoom.mean(axis=1,dtype=float64)
-    #Mz=sz_zoom.mean(axis=2,dtype=float64)
-    #for i in range(npart_x_zoom):
-        #sx_zoom[i,:,:]-=Mx
-    #for i in range(npart_y_zoom):
-        #sy_zoom[:,i,:]-=My
-    #for i in range(npart_z_zoom):
-        #sz_zoom[:,:,i]-=Mz
+    # del Mx,My,Mz
+    # Mx=sx2.mean(axis=0,dtype=float64)
+    # My=sy2.mean(axis=1,dtype=float64)
+    # Mz=sz2.mean(axis=2,dtype=float64)
+    # for i in range(npart_x):
+    # sx2[i,:,:]-=Mx
+    # for i in range(npart_y):
+    # sy2[:,i,:]-=My
+    # for i in range(npart_z):
+    # sz2[:,:,i]-=Mz
 
-    #del Mx,My,Mz
-    #Mx=sx2_zoom.mean(axis=0,dtype=float64)
-    #My=sy2_zoom.mean(axis=1,dtype=float64)
-    #Mz=sz2_zoom.mean(axis=2,dtype=float64)
-    #for i in range(npart_x_zoom):
-        #sx2_zoom[i,:,:]-=Mx
-    #for i in range(npart_y_zoom):
-        #sy2_zoom[:,i,:]-=My
-    #for i in range(npart_z_zoom):
-        #sz2_zoom[:,:,i]-=Mz
-    #del Mx,My,Mz
-    
-    
-    if (cellsize_zoom!=0):
-        return sx,sy,sz,sx2,sy2,sz2,sx_zoom,sy_zoom,sz_zoom,sx2_zoom,sy2_zoom,sz2_zoom
+    # del Mx,My,Mz
+    # Mx=sx_zoom.mean(axis=0,dtype=float64)
+    # My=sy_zoom.mean(axis=1,dtype=float64)
+    # Mz=sz_zoom.mean(axis=2,dtype=float64)
+    # for i in range(npart_x_zoom):
+    # sx_zoom[i,:,:]-=Mx
+    # for i in range(npart_y_zoom):
+    # sy_zoom[:,i,:]-=My
+    # for i in range(npart_z_zoom):
+    # sz_zoom[:,:,i]-=Mz
+
+    # del Mx,My,Mz
+    # Mx=sx2_zoom.mean(axis=0,dtype=float64)
+    # My=sy2_zoom.mean(axis=1,dtype=float64)
+    # Mz=sz2_zoom.mean(axis=2,dtype=float64)
+    # for i in range(npart_x_zoom):
+    # sx2_zoom[i,:,:]-=Mx
+    # for i in range(npart_y_zoom):
+    # sy2_zoom[:,i,:]-=My
+    # for i in range(npart_z_zoom):
+    # sz2_zoom[:,:,i]-=Mz
+    # del Mx,My,Mz
+
+    if cellsize_zoom != 0:
+        return (
+            sx,
+            sy,
+            sz,
+            sx2,
+            sy2,
+            sz2,
+            sx_zoom,
+            sy_zoom,
+            sz_zoom,
+            sx2_zoom,
+            sy2_zoom,
+            sz2_zoom,
+        )
     else:
-        return sx,sy,sz,sx2,sy2,sz2
+        return sx, sy, sz, sx2, sy2, sz2
 
 
-
-
-
-def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
-    """ 
+def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
+    """
     :math:`\\vspace{-1mm}`
 
-    Generates Gaussian initial conditions for cosmological 
-    simulations in the Zel'dovich appoximation (ZA) -- the first order 
+    Generates Gaussian initial conditions for cosmological
+    simulations in the Zel'dovich appoximation (ZA) -- the first order
     in Lagrangian Perturbation Theory (LPT).
-    
+
     **Arguments**:
 
-    * ``file_pk`` --  a string. Gives the filename for the plain text 
-      file containing the matter power spectrum at redshift zero from 
-      `CAMB <http://www.camb.info/>`_. For an example, see the included 
+    * ``file_pk`` --  a string. Gives the filename for the plain text
+      file containing the matter power spectrum at redshift zero from
+      `CAMB <http://www.camb.info/>`_. For an example, see the included
       :download:`camb_matterpower_z0.dat <./camb_matterpower_z0.dat>`.
-        
-    * ``boxsize`` -- a float (default: ``100.0``). Gives the size of the 
+
+    * ``boxsize`` -- a float (default: ``100.0``). Gives the size of the
       simulation box in Mpc/h.
-   
-    * ``npart`` --   an integer (default: ``64``). The total number of 
+
+    * ``npart`` --   an integer (default: ``64``). The total number of
       particles is ``npart``:sup:`3`.
-    
-    * ``init_seed`` --   an integer (default: ``1234``). The seed for the 
+
+    * ``init_seed`` --   an integer (default: ``1234``). The seed for the
       random number generator.
-    
+
     **Return**:
-    
-    * ``(sx,sy,sz)`` --   a tuple, where ``s``:sub:`i` is a 3-dim single 
-      precision NumPy array containing the ``i``-th component 
-      (``i`` = ``x``, ``y``, ``z``) of the particle displacements today as calculated 
+
+    * ``(sx,sy,sz)`` --   a tuple, where ``s``:sub:`i` is a 3-dim single
+      precision NumPy array containing the ``i``-th component
+      (``i`` = ``x``, ``y``, ``z``) of the particle displacements today as calculated
       in the ZA.
-    
-            
+
+
     **Example**:
-    
-    Generate a realization for the displacement field; calculate the 
+
+    Generate a realization for the displacement field; calculate the
     rms displacements; and show a projection of one of the components.
-    
+
         >>> from ic import ic_za
         >>> sx,sy,sz=ic_za('camb_matterpower_z0.dat')
         Memory allocation done
@@ -1139,185 +1339,202 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
         >>> plt.imshow(sx.mean(axis=2))
         <matplotlib.image.AxesImage object at 0x7fc4603697d0>
         >>> plt.show()
-        
+
 
 
     **Algorithm**:
-    
+
         Implemented in the usual fft way.
 
-    .. warning:: This function has been tested but not at the level of 
+    .. warning:: This function has been tested but not at the level of
        trusting it for doing research. Use at your own risk.
 
     """
 
-    #import sys
-    #sys.path.append(dir)
-    #sys.path.append('/home/user/Builds/pyFFTW-master-20140621/pyfftw')
+    # import sys
+    # sys.path.append(dir)
+    # sys.path.append('/home/user/Builds/pyFFTW-master-20140621/pyfftw')
     from numpy import pi, exp, sqrt
     from numpy import random as rnd
     from numpy import indices, where
-    #from cmath import exp
-    #from math import sqrt
+
+    # from cmath import exp
+    # from math import sqrt
     import pyfftw
     from multiprocessing import cpu_count
-    
-    
-    delta=2.0*pi/boxsize
-    nyq=npart//2
-    
-    nalign=pyfftw.simd_alignment
-    
-    npart_pad = 2*(npart//2 + 1)
-    
-    sx_pad = pyfftw.n_byte_align_empty((npart,npart,npart_pad),nalign,'float32')
-    sy_pad = pyfftw.n_byte_align_empty((npart,npart,npart_pad),nalign,'float32')
-    sz_pad = pyfftw.n_byte_align_empty((npart,npart,npart_pad),nalign,'float32')
-    
-    sx = sx_pad[:,:,:npart]
-    sy = sy_pad[:,:,:npart]
-    sz = sz_pad[:,:,:npart]
-    
-    sx_k = sx_pad.view('complex64')
-    sy_k = sy_pad.view('complex64')
-    sz_k = sz_pad.view('complex64')
-    
+
+    delta = 2.0 * pi / boxsize
+    nyq = npart // 2
+
+    nalign = pyfftw.simd_alignment
+
+    npart_pad = 2 * (npart // 2 + 1)
+
+    sx_pad = pyfftw.n_byte_align_empty((npart, npart, npart_pad), nalign, "float32")
+    sy_pad = pyfftw.n_byte_align_empty((npart, npart, npart_pad), nalign, "float32")
+    sz_pad = pyfftw.n_byte_align_empty((npart, npart, npart_pad), nalign, "float32")
+
+    sx = sx_pad[:, :, :npart]
+    sy = sy_pad[:, :, :npart]
+    sz = sz_pad[:, :, :npart]
+
+    sx_k = sx_pad.view("complex64")
+    sy_k = sy_pad.view("complex64")
+    sz_k = sz_pad.view("complex64")
+
     print("Memory allocation done")
-    
-    nthreads=cpu_count()
-    
-    sx_fft=pyfftw.FFTW(sx_k,sx, axes=(0,1,2),direction='FFTW_BACKWARD',threads=nthreads,flags=('FFTW_ESTIMATE','FFTW_DESTROY_INPUT'))
-    sy_fft=pyfftw.FFTW(sy_k,sy, axes=(0,1,2),direction='FFTW_BACKWARD',threads=nthreads,flags=('FFTW_ESTIMATE','FFTW_DESTROY_INPUT'))
-    sz_fft=pyfftw.FFTW(sz_k,sz, axes=(0,1,2),direction='FFTW_BACKWARD',threads=nthreads,flags=('FFTW_ESTIMATE','FFTW_DESTROY_INPUT'))
-    
+
+    nthreads = cpu_count()
+
+    sx_fft = pyfftw.FFTW(
+        sx_k,
+        sx,
+        axes=(0, 1, 2),
+        direction="FFTW_BACKWARD",
+        threads=nthreads,
+        flags=("FFTW_ESTIMATE", "FFTW_DESTROY_INPUT"),
+    )
+    sy_fft = pyfftw.FFTW(
+        sy_k,
+        sy,
+        axes=(0, 1, 2),
+        direction="FFTW_BACKWARD",
+        threads=nthreads,
+        flags=("FFTW_ESTIMATE", "FFTW_DESTROY_INPUT"),
+    )
+    sz_fft = pyfftw.FFTW(
+        sz_k,
+        sz,
+        axes=(0, 1, 2),
+        direction="FFTW_BACKWARD",
+        threads=nthreads,
+        flags=("FFTW_ESTIMATE", "FFTW_DESTROY_INPUT"),
+    )
+
     print("Plans created")
-    
-    p_of_k=_power_spectrum(file_pk)
-    
+
+    p_of_k = _power_spectrum(file_pk)
+
     print("Power spectrum read.")
-    
-    
+
     rnd.seed(int(init_seed))
-    
-    x,y,z=indices((nyq+1,nyq+1,nyq+1),dtype='float32')
-    
-    
-    c=[(npart -i) % npart for i in range(nyq+1)]
-    
-    w2 = x*x+y*y+z*z
-    
-    w2[0,0,0]=1.0 # irrelevant but a zero crashes
-    
-    
-    
-    amp  = sqrt(p_of_k(sqrt(w2)*delta)/boxsize**3) 
-    amp *= boxsize/(2.0*pi) # fix dimensions of 1/k
-    
-    
-    phi  = exp(1j*2.0*pi*rnd.uniform(0.0, 1.0, (nyq+1,nyq+1,nyq+1)))
-    phi *= rnd.normal(0.0,1.0,(nyq+1,nyq+1,nyq+1))
-    
-    
-    
-    sx_k[0:nyq+1, 0:nyq+1, 0:nyq+1]=x*phi/w2*amp
-    sy_k[0:nyq+1, 0:nyq+1, 0:nyq+1]=y*phi/w2*amp
-    sz_k[0:nyq+1, 0:nyq+1, 0:nyq+1]=z*phi/w2*amp
-    
+
+    x, y, z = indices((nyq + 1, nyq + 1, nyq + 1), dtype="float32")
+
+    c = [(npart - i) % npart for i in range(nyq + 1)]
+
+    w2 = x * x + y * y + z * z
+
+    w2[0, 0, 0] = 1.0  # irrelevant but a zero crashes
+
+    amp = sqrt(p_of_k(sqrt(w2) * delta) / boxsize ** 3)
+    amp *= boxsize / (2.0 * pi)  # fix dimensions of 1/k
+
+    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+
+    sx_k[0 : nyq + 1, 0 : nyq + 1, 0 : nyq + 1] = x * phi / w2 * amp
+    sy_k[0 : nyq + 1, 0 : nyq + 1, 0 : nyq + 1] = y * phi / w2 * amp
+    sz_k[0 : nyq + 1, 0 : nyq + 1, 0 : nyq + 1] = z * phi / w2 * amp
+
     del phi
-    
-    phi  = exp(1j*2.0*pi*rnd.uniform(0.0, 1.0, (nyq+1,nyq+1,nyq+1)))
-    phi *= rnd.normal(0.0,1.0,(nyq+1,nyq+1,nyq+1))
-    
-    sx_k[c, 0:nyq+1, 0:nyq+1]= - x*phi/w2*amp
-    sy_k[c, 0:nyq+1, 0:nyq+1]=   y*phi/w2*amp
-    sz_k[c, 0:nyq+1, 0:nyq+1]=   z*phi/w2*amp
-    
+
+    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+
+    sx_k[c, 0 : nyq + 1, 0 : nyq + 1] = -x * phi / w2 * amp
+    sy_k[c, 0 : nyq + 1, 0 : nyq + 1] = y * phi / w2 * amp
+    sz_k[c, 0 : nyq + 1, 0 : nyq + 1] = z * phi / w2 * amp
+
     del phi
-    
-    phi  = exp(1j*2.0*pi*rnd.uniform(0.0, 1.0, (nyq+1,nyq+1,nyq+1)))
-    phi *= rnd.normal(0.0,1.0,(nyq+1,nyq+1,nyq+1))
-    
-    sx_k[0:nyq+1, c, 0:nyq+1]=   x*phi/w2*amp
-    sy_k[0:nyq+1, c, 0:nyq+1]= - y*phi/w2*amp
-    sz_k[0:nyq+1, c, 0:nyq+1]=   z*phi/w2*amp
-    
+
+    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+
+    sx_k[0 : nyq + 1, c, 0 : nyq + 1] = x * phi / w2 * amp
+    sy_k[0 : nyq + 1, c, 0 : nyq + 1] = -y * phi / w2 * amp
+    sz_k[0 : nyq + 1, c, 0 : nyq + 1] = z * phi / w2 * amp
+
     del phi
-    
-    phi  = exp(1j*2.0*pi*rnd.uniform(0.0, 1.0, (nyq+1,nyq+1,nyq+1)))
-    phi *= rnd.normal(0.0,1.0,(nyq+1,nyq+1,nyq+1))
-    
-    tmp = - x*phi/w2*amp
-    sx_k[npart-1:nyq-1:-1, 0               , :]= tmp[1:nyq+1, 0      , :]
-    sx_k[0               , npart-1:nyq-1:-1, :]= tmp[0      , 1:nyq+1, :]
-    sx_k[0               , 0               , :]= tmp[0      , 0      , :]
-    
+
+    phi = exp(1j * 2.0 * pi * rnd.uniform(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1)))
+    phi *= rnd.normal(0.0, 1.0, (nyq + 1, nyq + 1, nyq + 1))
+
+    tmp = -x * phi / w2 * amp
+    sx_k[npart - 1 : nyq - 1 : -1, 0, :] = tmp[1 : nyq + 1, 0, :]
+    sx_k[0, npart - 1 : nyq - 1 : -1, :] = tmp[0, 1 : nyq + 1, :]
+    sx_k[0, 0, :] = tmp[0, 0, :]
+
     del tmp
 
-    tmp = - y*phi/w2*amp
-    sy_k[npart-1:nyq-1:-1, 0               , :]= tmp[1:nyq+1, 0      , :]
-    sy_k[0               , npart-1:nyq-1:-1, :]= tmp[0      , 1:nyq+1, :]
-    sy_k[0               , 0               , :]= tmp[0      , 0      , :]
-    
+    tmp = -y * phi / w2 * amp
+    sy_k[npart - 1 : nyq - 1 : -1, 0, :] = tmp[1 : nyq + 1, 0, :]
+    sy_k[0, npart - 1 : nyq - 1 : -1, :] = tmp[0, 1 : nyq + 1, :]
+    sy_k[0, 0, :] = tmp[0, 0, :]
+
     del tmp
-    
-    tmp =  z*phi/w2*amp
-    sz_k[npart-1:nyq-1:-1, 0               , :]= tmp[1:nyq+1, 0      , :]
-    sz_k[0               , npart-1:nyq-1:-1, :]= tmp[0      , 1:nyq+1, :]
-    sz_k[0               , 0               , :]= tmp[0      , 0      , :]
-    
-    del phi,w2,amp,tmp
-    
-    
+
+    tmp = z * phi / w2 * amp
+    sz_k[npart - 1 : nyq - 1 : -1, 0, :] = tmp[1 : nyq + 1, 0, :]
+    sz_k[0, npart - 1 : nyq - 1 : -1, :] = tmp[0, 1 : nyq + 1, :]
+    sz_k[0, 0, :] = tmp[0, 0, :]
+
+    del phi, w2, amp, tmp
 
     print("Randoms done.")
 
-    sx_k[0,0,0]=0
-    sy_k[0,0,0]=0
-    sz_k[0,0,0]=0
-    
-    
-    
-    sx_k[npart-1:0:-1, npart-1:nyq-1:-1, [0,nyq]]  =  (sx_k[1:npart, 1:nyq+1,  [0,nyq]]).conjugate()
-    sx_k[0           , npart-1:nyq-1:-1, [0,nyq]]  =  (sx_k[0      , 1:nyq+1,  [0,nyq]]).conjugate()
-    sx_k[npart-1:0:-1, 0               , [0,nyq]]  =  (sx_k[1:npart, 0      ,  [0,nyq]]).conjugate()
-                                                      
-    sy_k[npart-1:0:-1, npart-1:nyq-1:-1, [0,nyq]]  =  (sy_k[1:npart, 1:nyq+1,  [0,nyq]]).conjugate()
-    sy_k[0           , npart-1:nyq-1:-1, [0,nyq]]  =  (sy_k[0      , 1:nyq+1,  [0,nyq]]).conjugate()
-    sy_k[npart-1:0:-1, 0               , [0,nyq]]  =  (sy_k[1:npart, 0      ,  [0,nyq]]).conjugate()
-                                                      
-    sz_k[npart-1:0:-1, npart-1:nyq-1:-1, [0,nyq]]  =  (sz_k[1:npart, 1:nyq+1,  [0,nyq]]).conjugate()
-    sz_k[0           , npart-1:nyq-1:-1, [0,nyq]]  =  (sz_k[0      , 1:nyq+1,  [0,nyq]]).conjugate()
-    sz_k[npart-1:0:-1, 0               , [0,nyq]]  =  (sz_k[1:npart, 0      ,  [0,nyq]]).conjugate()
-    
+    sx_k[0, 0, 0] = 0
+    sy_k[0, 0, 0] = 0
+    sz_k[0, 0, 0] = 0
 
-    
-    idx = where((x % nyq)+(y % nyq)+(z % nyq)==0)
-    del x,y,z
-    
-    sx_k[idx]=sx_k[idx].real
-    sy_k[idx]=sy_k[idx].real
-    sz_k[idx]=sz_k[idx].real
-    
+    sx_k[npart - 1 : 0 : -1, npart - 1 : nyq - 1 : -1, [0, nyq]] = (
+        sx_k[1:npart, 1 : nyq + 1, [0, nyq]]
+    ).conjugate()
+    sx_k[0, npart - 1 : nyq - 1 : -1, [0, nyq]] = (
+        sx_k[0, 1 : nyq + 1, [0, nyq]]
+    ).conjugate()
+    sx_k[npart - 1 : 0 : -1, 0, [0, nyq]] = (sx_k[1:npart, 0, [0, nyq]]).conjugate()
+
+    sy_k[npart - 1 : 0 : -1, npart - 1 : nyq - 1 : -1, [0, nyq]] = (
+        sy_k[1:npart, 1 : nyq + 1, [0, nyq]]
+    ).conjugate()
+    sy_k[0, npart - 1 : nyq - 1 : -1, [0, nyq]] = (
+        sy_k[0, 1 : nyq + 1, [0, nyq]]
+    ).conjugate()
+    sy_k[npart - 1 : 0 : -1, 0, [0, nyq]] = (sy_k[1:npart, 0, [0, nyq]]).conjugate()
+
+    sz_k[npart - 1 : 0 : -1, npart - 1 : nyq - 1 : -1, [0, nyq]] = (
+        sz_k[1:npart, 1 : nyq + 1, [0, nyq]]
+    ).conjugate()
+    sz_k[0, npart - 1 : nyq - 1 : -1, [0, nyq]] = (
+        sz_k[0, 1 : nyq + 1, [0, nyq]]
+    ).conjugate()
+    sz_k[npart - 1 : 0 : -1, 0, [0, nyq]] = (sz_k[1:npart, 0, [0, nyq]]).conjugate()
+
+    idx = where((x % nyq) + (y % nyq) + (z % nyq) == 0)
+    del x, y, z
+
+    sx_k[idx] = sx_k[idx].real
+    sy_k[idx] = sy_k[idx].real
+    sz_k[idx] = sz_k[idx].real
+
     del idx
-    
-    print("Nyquists fixed")
-    
-    sx_fft(normalise_idft=False)
-    #sX=sx.copy()
-    del sx_k,sx_fft, sx_pad
-    print("sx fft ready")
-    
-    sy_fft(normalise_idft=False)
-    #sY=sy.copy()
-    del sy_k,sy_fft, sy_pad
-    print("sy fft ready")
-    
-    sz_fft(normalise_idft=False)
-    #sZ=sz.copy()
-    del sz_k,sz_fft, sz_pad
-    print("sz fft ready")
-    
-    
-    
-    return sx,sy,sz
 
+    print("Nyquists fixed")
+
+    sx_fft(normalise_idft=False)
+    # sX=sx.copy()
+    del sx_k, sx_fft, sx_pad
+    print("sx fft ready")
+
+    sy_fft(normalise_idft=False)
+    # sY=sy.copy()
+    del sy_k, sy_fft, sy_pad
+    print("sy fft ready")
+
+    sz_fft(normalise_idft=False)
+    # sZ=sz.copy()
+    del sz_k, sz_fft, sz_pad
+    print("sz fft ready")
+
+    return sx, sy, sz
