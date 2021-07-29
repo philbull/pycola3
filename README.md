@@ -25,11 +25,15 @@ scientific work, we kindly ask you to reference the papers above.
 
 * ``pycola`` is free and open-source software, distributed under the GPLv3 license.
 
-* To build and install the code, you need to run:
+* To build and install the code, you can either use ``pip``:
 
 ```
-#!bash
+pip install git+https://github.com/philbull/pycola3.git
+```
 
+or, alternatvely, install locally from a git checkout:
+
+```
   python setup.py install
 ```
 
