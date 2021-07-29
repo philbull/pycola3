@@ -1,0 +1,9 @@
+name: pycola
+dependencies:
+  - python>=3.7
+  - numpy
+  - scipy
+  - h5py
+  - pyfftw
+  - multiprocessing
+  - cython
