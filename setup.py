@@ -101,7 +101,7 @@ is on `bitbucket <https://bitbucket.org/tassev/pycola>`_.
 
 setup_args = {
     "name": "pycola3",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "author": "Phil Bull / Svetlin V. Tassev",
     "author_email": "philbull@gmail.com",
     "description": "A Python/Cython N-body code, implementing the Comoving Lagrangian Acceleration (COLA) method in the temporal and spatial domains.",
