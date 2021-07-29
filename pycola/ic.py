@@ -399,7 +399,7 @@ def ic_2lpt(
     
 
 
-    from ic import ic_2lpt_engine
+    #from ic import ic_2lpt_engine
     res = ic_2lpt_engine(  
              sx,                                                    
              sy,                                                    
@@ -1154,7 +1154,9 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     #import sys
     #sys.path.append(dir)
     #sys.path.append('/home/user/Builds/pyFFTW-master-20140621/pyfftw')
-    from numpy import pi,exp,sqrt
+    from numpy import pi, exp, sqrt
+    from numpy import random as rnd
+    from numpy import indices, where
     #from cmath import exp
     #from math import sqrt
     import pyfftw
@@ -1180,7 +1182,6 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     sy_k = sy_pad.view('complex64')
     sz_k = sz_pad.view('complex64')
     
-    
     print("Memory allocation done")
     
     nthreads=cpu_count()
@@ -1195,8 +1196,6 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     
     print("Power spectrum read.")
     
-    from numpy import random as rnd
-    from numpy import indices
     
     rnd.seed(int(init_seed))
     
@@ -1292,15 +1291,14 @@ def ic_za(file_pk,boxsize=100.0,npart=64,init_seed=1234):
     
 
     
-    i = (x % nyq)+(y % nyq)+(z % nyq)==0
+    idx = where((x % nyq)+(y % nyq)+(z % nyq)==0)
     del x,y,z
     
+    sx_k[idx]=sx_k[idx].real
+    sy_k[idx]=sy_k[idx].real
+    sz_k[idx]=sz_k[idx].real
     
-    sx_k[i]=sx_k[i].real
-    sy_k[i]=sy_k[i].real
-    sz_k[i]=sz_k[i].real
-    
-    del i
+    del idx
     
     print("Nyquists fixed")
     

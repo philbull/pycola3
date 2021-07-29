@@ -164,12 +164,12 @@ def evolve(
     """
  
     from numpy import array,zeros
-    from ic import initial_positions,ic_2lpt_engine
-    from growth import _vel_coef,_displ_coef, growth_factor_solution,growth_2lpt,d_growth2
-    from potential import  get_phi, initialize_density
-    from acceleration import grad_phi_engine
+    from .ic import initial_positions,ic_2lpt_engine
+    from .growth import _vel_coef,_displ_coef, growth_factor_solution,growth_2lpt,d_growth2
+    from .potential import  get_phi, initialize_density
+    from .acceleration import grad_phi_engine
     from scipy import interpolate
-    from cic import CICDeposit_3
+    from .cic import CICDeposit_3
     
     if (cellsize_zoom==0):
         BBox_in=array([[0,0],[0,0],[0,0]],dtype='int32')
@@ -270,6 +270,8 @@ def evolve(
 #######################
 # Some initializations:
 #######################
+    px_zoom = py_zoom = pz_zoom = None
+    vx_zoom = vy_zoom = vz_zoom = None
 
 # density:
     density,den_k,den_fft,phi_fft  = initialize_density(ngrid_x,ngrid_y,ngrid_z)
@@ -334,7 +336,7 @@ def evolve(
         vz_zoom = initial_d_growth *  (sz_full_zoom) + initial_d_growth2 * (sz2_full_zoom)
     
     print("Smoothing arrays for the COLA game ...")
-    from box_smooth import box_smooth
+    from .box_smooth import box_smooth
     tmp=zeros(sx_full.shape,dtype='float32')
     box_smooth(sx_full, tmp)
     sx_full[:]=tmp[:]
@@ -549,7 +551,7 @@ def evolve(
     
     # Now convert velocities to 
     # v_{rsd}\equiv (ds/d\eta)/(a H(a)):
-    from growth import _q_factor
+    from .growth import _q_factor
     rsd_fac=a_final/_q_factor(a_final,Om,Ol)
     vx*=rsd_fac
     vy*=rsd_fac
