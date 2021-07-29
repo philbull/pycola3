@@ -70,6 +70,7 @@ from distutils.extension import Extension
 from distutils.util import get_platform
 from distutils.ccompiler import get_default_compiler
 
+import numpy as np
 import os
 
 try:
@@ -99,7 +100,7 @@ except ImportError as e:
 
 
 
-include_dirs = []
+include_dirs = [np.get_include()]
 library_dirs = []
 package_data = {}
 
@@ -166,7 +167,7 @@ is on `bitbucket <https://bitbucket.org/tassev/pycola>`_.
 
 setup_args = {
         'name': 'pyCOLA',
-        'version': 1.0,
+        'version': 3.0,
         'author': 'Svetlin Tassev',
         'author_email': 'stassev@alum.mit.edu',
         'description': 'A Python/Cython N-body code, implementing the Comoving Lagrangian Acceleration (COLA) method in the temporal and spatial domains.',
@@ -174,7 +175,7 @@ setup_args = {
         'long_description': long_description,
         'classifiers': [
             'Programming Language :: Python',
-            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3.9',
             'Programming Language :: Cython',
             'Development Status :: 5 - Production/Stable',
             'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
@@ -183,7 +184,7 @@ setup_args = {
             'Topic :: Scientific/Engineering :: Astronomy',
             'Topic :: Scientific/Engineering :: Physics'
             ],
-        'packages':['ic','evolve','acceleraton', 'cic','potential','box_smooth'],
+        #'packages':['ic','evolve','acceleraton', 'cic','potential','box_smooth'],
         'ext_modules': ext_modules,
         'include_dirs': include_dirs,
         'cmdclass' : {'build_ext': build_ext},
