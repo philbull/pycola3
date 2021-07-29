@@ -3,7 +3,6 @@
 requires = ["setuptools>=30.3.0",
             "wheel",
             "setuptools_scm",
-            "oldest-supported-numpy",
             "cython>=0.23",
             "pyfftw"]
 build-backend = "setuptools.build_meta"
