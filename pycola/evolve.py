@@ -21,23 +21,18 @@
 ########################################################################
 ########################################################################
 
-import numpy as np
-from scipy import interpolate
 import time
 
-from .ic import initial_positions, ic_2lpt_engine
-from .growth import (
-    _vel_coef,
-    _displ_coef,
-    growth_factor_solution,
-    growth_2lpt,
-    d_growth2,
-    _q_factor,
-)
-from .potential import get_phi, initialize_density
+import numpy as np
+from scipy import interpolate
+
 from .acceleration import grad_phi_engine
-from .cic import CICDeposit_3
 from .box_smooth import box_smooth
+from .cic import CICDeposit_3
+from .growth import (_displ_coef, _q_factor, _vel_coef, d_growth2, growth_2lpt,
+                     growth_factor_solution)
+from .ic import ic_2lpt_engine, initial_positions
+from .potential import get_phi, initialize_density
 
 
 def evolve(
@@ -342,12 +337,12 @@ def evolve(
 
     # velocities:
 
-    # Initial residual velocities are zero in COLA. This corresponds to the L_- 
-    # operator in 1301.0322. But to avoid short-scale noise, we do the 
-    # smoothing trick explained in the new paper. However, that smoothing 
-    # should not affect the IC velocities! So, first add the full vel, then 
+    # Initial residual velocities are zero in COLA. This corresponds to the L_-
+    # operator in 1301.0322. But to avoid short-scale noise, we do the
+    # smoothing trick explained in the new paper. However, that smoothing
+    # should not affect the IC velocities! So, first add the full vel, then
     # further down subtract the same but smoothed.
-    # This smoothing is not really needed if covers_full_box=True. But that 
+    # This smoothing is not really needed if covers_full_box=True. But that
     # case is not very interesting here, so we do it just the same.
     vx = initial_d_growth * (sx_full) + initial_d_growth2 * (sx2_full)
     vy = initial_d_growth * (sy_full) + initial_d_growth2 * (sy2_full)
@@ -467,7 +462,7 @@ def evolve(
     ####################
     if verbose:
         print("Beginning evolution")
-        
+
     for i in range(n_steps + 1):
 
         if i == 0 or i == n_steps:
@@ -602,7 +597,7 @@ def evolve(
 
         if verbose:
             print("    Kicked to a =  %4.4f" % aKick)
-        
+
         ################
         # DRIFT
         ################

@@ -24,9 +24,9 @@
 import numpy as np
 from scipy import integrate
 
-
 #   This solves for the linear growth factor and its derivative
 #   The notation follows eq. (A.1,A.2) of arXiv:1301.0322
+
 
 def _q_factor(a, Om, Ol):  # this is Q(a)
     return a ** 3 * np.sqrt(Om / a ** 3 + Ol + (1.0 - Om - Ol) / a ** 2)
@@ -122,10 +122,10 @@ def d_growth2(a, d, Om, Ol):
     """
     :math:`\\vspace{-1mm}`
 
-    Return :math:`T[D_2](a)` for the second order growth factor, :math:`D_2`, 
-    for a given scale factor and respective linear growth factor. Here :math:`T` 
-    is given by equation (A.1) of [temporalCOLA]_. One needs to precompute the 
-    linear growth factor. :math:`\Lambda\mathrm{CDM}` is assumed for this 
+    Return :math:`T[D_2](a)` for the second order growth factor, :math:`D_2`,
+    for a given scale factor and respective linear growth factor. Here :math:`T`
+    is given by equation (A.1) of [temporalCOLA]_. One needs to precompute the
+    linear growth factor. :math:`\Lambda\mathrm{CDM}` is assumed for this
     calculation.
 
     **Arguments**:
@@ -149,6 +149,7 @@ def d_growth2(a, d, Om, Ol):
 #   These are routines calculating the displacement and velocity
 #   coefficients for the COLA timestepping.
 #   See eq. (A.15) of arXiv:1301.0322
+
 
 def _u_ansatz(a, nCola):
     return a ** nCola
@@ -181,4 +182,3 @@ def _displ_coef(ai, af, ac, nCola, Om, Ol):
         _displ_coef_integral, float(ai), float(af), args=(nCola, Om, Ol)
     )[0]
     return coef
-
