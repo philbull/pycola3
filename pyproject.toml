@@ -1,0 +1,10 @@
+[tool.black]
+    exclude = '''
+    /(
+        \.git
+      | build
+      | dist
+      | docs
+      | examples
+      | pycola/src
+    )/
