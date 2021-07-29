@@ -29,8 +29,14 @@ from scipy import interpolate
 from .acceleration import grad_phi_engine
 from .box_smooth import box_smooth
 from .cic import CICDeposit_3
-from .growth import (_displ_coef, _q_factor, _vel_coef, d_growth2, growth_2lpt,
-                     growth_factor_solution)
+from .growth import (
+    _displ_coef,
+    _q_factor,
+    _vel_coef,
+    d_growth2,
+    growth_2lpt,
+    growth_factor_solution,
+)
 from .ic import ic_2lpt_engine, initial_positions
 from .potential import get_phi, initialize_density
 
