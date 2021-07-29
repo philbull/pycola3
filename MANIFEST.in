@@ -1,0 +1,13 @@
+include *.md
+include LICENSE
+include *.yml
+include *.toml
+include *.py
+include pycola3/*.py
+include pycola3/src/*.pyx
+include pycola3/src/*.c
+include docs/*.rst
+include examples/*.py
+include examples/*.dat
+prune .github
+prune .gitignore

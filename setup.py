@@ -122,12 +122,12 @@ setup_args = {
     ],
     "ext_modules": cythonize(ext_modules, language_level=3),
     "include_dirs": include_dirs,
+    "include_package_data": False,
     "install_requires": [
         "numpy",
         "scipy",
         "h5py",
         "pyfftw",
-        "multiprocessing",
         "cython",
     ],
 }
