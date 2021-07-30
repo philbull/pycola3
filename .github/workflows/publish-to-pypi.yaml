@@ -20,12 +20,13 @@ jobs:
         uses: RalfG/python-wheels-manylinux-build@v0.3.4-manylinux2014_x86_64
         with:
           python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39'
-          build-requirements: 'cython numpy pyfftw'
-          pre-build-command: 'yum -y install fftw-devel'
+          build-requirements: 'cython numpy'
+          pre-build-command: 'sh compile_pyfftw.sh'
       - name: Copy manylinux wheel into the dist directory
         run: |
           mkdir dist_manylinux/
           cp dist/*manylinux*.whl dist_manylinux/
+          cp dist/*.tar.gz dist_manylinux/
       # deploy to Test PyPI on any push except when merging to master, since that will
       # already exist, and thus fail.
       - name: Publish distribution to Test PyPI
