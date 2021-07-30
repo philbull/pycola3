@@ -21,6 +21,7 @@ jobs:
         with:
           python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39'
           build-requirements: 'cython numpy pyfftw'
+          pre-build-command: 'yum install fftw-devel'
       - name: Copy manylinux wheel into the dist directory
         run: |
           mkdir dist_manylinux/
