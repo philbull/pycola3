@@ -1275,19 +1275,18 @@ def ic_2lpt_engine(
         return sx, sy, sz, sx2, sy2, sz2
 
 
-def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
+def ic_za(pspec0, boxsize=100.0, npart=64, init_seed=1234):
     """
-    :math:`\\vspace{-1mm}`
-
     Generates Gaussian initial conditions for cosmological
     simulations in the Zel'dovich appoximation (ZA) -- the first order
     in Lagrangian Perturbation Theory (LPT).
 
     **Arguments**:
 
-    * ``file_pk`` --  a string. Gives the filename for the plain text
-      file containing the matter power spectrum at redshift zero from
-      `CAMB <http://www.camb.info/>`_. For an example, see the included
+    * ``pspec0`` --  a string or callable function. If a string, this gives
+      the filename for the plain text file containing the matter power
+      spectrum at redshift zero from `CAMB <http://www.camb.info/>`_.
+      For an example, see the included
       :download:`camb_matterpower_z0.dat <./camb_matterpower_z0.dat>`.
 
     * ``boxsize`` -- a float (default: ``100.0``). Gives the size of the
@@ -1389,7 +1388,12 @@ def ic_za(file_pk, boxsize=100.0, npart=64, init_seed=1234):
 
     print("Plans created")
 
-    p_of_k = _power_spectrum(file_pk)
+    # Determine whether power spectrum is function or filename
+    if isinstance(pspec0, str):
+        p_of_k = _power_spectrum(pspec0)
+    else:
+        assert callable(pspec0), "pspec0 must be a filename or a callable function"
+        p_of_k = pspec0
 
     print("Power spectrum read.")
 

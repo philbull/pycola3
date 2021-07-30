@@ -21,7 +21,7 @@ class COLABox(object):
         z_final=0.0,
         omega_m=0.316,
         h=0.67,
-        pspec_file="camb_matterpower_z0.dat",
+        pspec="camb_matterpower_z0.dat",
     ):
         """Class to handle metadata for a COLA simulation box.
 
@@ -45,9 +45,11 @@ class COLABox(object):
             Default: 0.316.
         h : float, optional
             Dimensionless Hubble parameter. Default: 0.67.
-        pspec_file : str, optional
-            Filename of the data file containing the matter power spectrum at
-            z=0, in Mpc/h units. Default: "camb_matterpower_z0.dat"
+        pspec : callable or str, optional
+            Either a callable function that return the matter power spectrum as
+            a function of k (in h/Mpc units), or the filename of a data file
+            containing the matter power spectrum at z=0, in Mpc/h units.
+            Default: "camb_matterpower_z0.dat"
         """
         assert isinstance(box_size, (float, np.float)), "box_size must be a float"
         self.box_size = box_size
@@ -68,7 +70,7 @@ class COLABox(object):
         self.h = h
 
         # Matter power spectrum at z=0
-        self.pspec_file = pspec_file
+        self.pspec = pspec
 
         # Particle displacement/velocities
         self.sx = self.sy = self.sz = None
@@ -130,7 +132,7 @@ class COLABox(object):
 
         # Calculate ZA initial conditions
         sx, sy, sz = ic_za(
-            self.pspec_file,
+            self.pspec,
             boxsize=self.box_size,
             npart=self.nparticles,
             init_seed=self.seed,
