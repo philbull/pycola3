@@ -1,10 +1,14 @@
-**Author:** Svetlin V. Tassev (Harvard U, Princeton U)
+[![Documentation Status](https://readthedocs.org/projects/pycola3/badge/?version=latest)](https://pycola3.readthedocs.io/en/latest/?badge=latest)
 
-Ported to Python 3 by Phil Bull (Queen Mary University of London)
+Author: Svetlin Tassev
 
-*Initial public release date:* Jul 3, 2014
+Ported to Python 3 by [Phil Bull](http://philbull.com/)
 
-*Python 3 port released:* 29 Jul 2021
+Website: [pycola3](https://github.com/philbull/pycola3) | [Original pyCOLA](https://bitbucket.org/tassev/pycola)
+
+Documentation: [PDF Documentation](https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf)
+
+License: [GPLv3+ License](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ``pycola3`` is a multithreaded Python/Cython N-body code, implementing the
 Comoving Lagrangian Acceleration (COLA) method in the temporal and
@@ -30,6 +34,8 @@ scientific work, we kindly ask you to reference the papers above.
 ```
   python setup.py install
 ```
+
+If you are using Python 3.9, you may need to install ``pyfftw3`` using ``conda`` first, before attempting to run the ``setup.py`` script.
 
 While there is a ``pip`` package for ``pycola3``, it is currently not functional due to dependency/binary compatibility issues.
 
