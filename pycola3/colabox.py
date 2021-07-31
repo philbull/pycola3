@@ -32,19 +32,26 @@ class COLABox(object):
         ----------
         ngrid : int
             Number of grid cells in each dimension.
+
         nparticles : int
             Number of particles in each dimension.
+
         box_size : float
             Linear dimension of the cubic box, in Mpc/h units.
+
         z_init : float
             Initial redshift of the COLA evolution.
+
         z_final : float, optional
             Final redshift of the COLA evolution. Default: 0.
+
         omega_m : float, optional
             Fractional matter density today. A flat LCDM cosmology is assumed.
             Default: 0.316.
+
         h : float, optional
             Dimensionless Hubble parameter. Default: 0.67.
+
         pspec : callable or str, optional
             Either a callable function that return the matter power spectrum as
             a function of k (in h/Mpc units), or the filename of a data file
