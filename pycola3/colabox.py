@@ -36,7 +36,7 @@ class COLABox(object):
             z_final (float, optional): Final redshift of the COLA evolution.
             omega_m (float, optional): Fractional matter density today. A flat LCDM cosmology is assumed.
             h (float, optional): Dimensionless Hubble parameter.
-            pspec (callable or str, optional): Either a callable function that return the matter power spectrum as
+            pspec (callable or str, optional): Either a callable function that returns the matter power spectrum as
                 a function of k (in h/Mpc units), or the filename of a data file
                 containing the matter power spectrum at z=0, in Mpc/h units.
         """

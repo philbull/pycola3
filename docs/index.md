@@ -7,7 +7,7 @@ Ported to Python 3 by [Phil Bull](http://philbull.com/)
 
 Website: [pycola3](https://github.com/philbull/pycola3) | [Original pyCOLA](https://bitbucket.org/tassev/pycola)
 
-Documentation: [PDF Documentation](https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf)
+Documentation (old version): [PDF Documentation](https://github.com/philbull/pycola3/files/6911023/pyCOLA.pdf)
 
 License: [GPLv3+ License](https://www.gnu.org/licenses/gpl-3.0.html)
 
