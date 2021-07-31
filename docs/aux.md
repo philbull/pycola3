@@ -1,6 +1,1 @@
-
-
-.. automodule:: aux
-    :members:
-    :undoc-members:
-    :show-inheritance:
+::: pycola3.aux

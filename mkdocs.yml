@@ -1,0 +1,41 @@
+site_name: pycola3
+
+theme:
+  name: "material"
+  features:
+    - navigation.expand
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - from unittest.mock import MagicMock as mock
+            - sys.modules["numpy"] = mock()
+            - sys.modules["numpy.fft"] = mock()
+            - sys.modules["scipy"] = mock()
+            - sys.modules["scipy.signal"] = mock()
+            - sys.modules["scipy.integrate"] = mock()
+            - sys.modules["scipy.interpolate"] = mock()
+            - sys.modules["scipy.optimize"] = mock()
+            - sys.modules["pylab"] = mock()
+            - sys.modules["matplotlib"] = mock()
+            - sys.modules["pyccl"] = mock()
+            - sys.modules["multiprocessing"] = mock()
+            - sys.modules["pyfftw"] = mock()
+            - sys.modules["h5py"] = mock()
+            - sys.modules["pycola3.acceleration"] = mock()
+            - sys.modules["pycola3.box_smooth"] = mock()
+            - sys.modules["pycola3.cic"] = mock()
+            - sys.modules["pycola3.potential"] = mock()
+
+
+nav:
+  - Home: index.md
+  - Code Reference:
+      - COLABox: colabox.md
+      - Auxiliary: aux.md
+      - Evolve: evolve.md
+      - Growth: growth.md
+      - Initial conditions: ic.md

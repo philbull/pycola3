@@ -1,126 +1,93 @@
-.. ########################################################################
-.. ########################################################################
-.. #    Copyright (c) 2013,2014       Svetlin Tassev
-.. #                       Princeton University,Harvard University
-.. #
-.. #   This file is part of pyCOLA.
-.. #
-.. #   pyCOLA is free software: you can redistribute it and/or modify
-.. #   it under the terms of the GNU General Public License as published by
-.. #   the Free Software Foundation, either version 3 of the License, or
-.. #   (at your option) any later version.
-.. #
-.. #   pyCOLA is distributed in the hope that it will be useful,
-.. #   but WITHOUT ANY WARRANTY; without even the implied warranty of
-.. #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-.. #   GNU General Public License for more details.
-.. #
-.. #   You should have received a copy of the GNU General Public License
-.. #   along with pyCOLA.  If not, see <http://www.gnu.org/licenses/>.
-.. #
-.. ########################################################################
-.. ########################################################################
+pycola3
+=======
 
+Author: Svetlin Tassev
 
-Welcome to pyCOLA's documentation!
-==================================
+Ported to Python 3 by [Phil Bull](http://philbull.com/)
 
-:Author: Svetlin Tassev
-:Version: |release|
-:Date: June 26, 2014
-:Homepage: `pyCOLA Homepage`_
-:Documentation: `PDF Documentation <https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf>`_
-:License: `GPLv3+ License`_
+Website: [pycola3](https://github.com/philbull/pycola3) | [Original pyCOLA](https://bitbucket.org/tassev/pycola)
 
-.. _pyCOLA Homepage: https://bitbucket.org/tassev/pycola
-.. _GPLv3+ License: https://www.gnu.org/licenses/gpl-3.0.html
+Documentation: [PDF Documentation](https://bitbucket.org/tassev/pycola/downloads/pyCOLA.pdf)
 
+License: [GPLv3+ License](https://www.gnu.org/licenses/gpl-3.0.html)
 
 Introduction
 ------------
 
-pyCOLA is a multithreaded Python/Cython N-body code, implementing the
+``pycola3`` is a multithreaded Python/Cython N-body code, implementing the
 Comoving Lagrangian Acceleration (COLA) method in the temporal and
-spatial domains. pyCOLA also implements a novel method to compute
+spatial domains. ``pycola3`` also implements a novel method to compute
 second-order cosmological initial conditions for given initial
 conditions at first-order for arbitrary initial particle configurations
 (including glass initial conditions, as well as initial conditions
 having refined subregions).
 
-pyCOLA is based on the following two papers: [temporalCOLA]_,
-[spatialCOLA]_. We kindly ask you [#f1]_ to acknowledge them and their
-authors in any program or publication in which you use the COLA method
-in the temporal and/or spatial domains.
-
-The new method for calculating second-order cosmological initial
-conditions is based on the following paper: (todo: Daniel, let me know
-what to cite). Again, we kindly ask you to acknowledge that paper and its
-authors in any program or publication in which you use that method.
+``pycola3`` is based on the following two papers:
+[temporalCOLA](#temporalCOLA) and [spatialCOLA](#spatialCOLA). We kindly
+ask you to acknowledge them and their authors in any program or
+publication in which you use the COLA method in the temporal and/or
+spatial domains. (We do not *require* you to, however, as we want
+pyCOLA to be GPLv3 compatible.)
 
 
-.. rubric:: Footnotes
+**Footnotes**
 
-.. [#f1] We do not *require* you, however, as we want pyCOLA to be
-   GPLv3 compatible.
+``pycola3`` requires [NumPy](http://www.numpy.org/),
+[SciPy](http://www.scipy.org/),
+[pyFFTW](https://github.com/pyFFTW/pyFFTW),
+[h5py](http://www.h5py.org/), as well as their respective dependencies.
 
-pyCOLA requires `NumPy <http://www.numpy.org/>`_, `SciPy
-<http://www.scipy.org/>`_, `pyFFTW
-<https://hgomersall.github.io/pyFFTW/index.html>`_, `h5py
-<http://www.h5py.org/>`_, as well as their respective dependencies.
-Note that pyFFTW v0.9.2 does not support large arrays, so one needs to
-install the development version from `github
-<https://github.com/hgomersall/pyFFTW>`_, where the bug has been fixed.
-
-
-
-.. note::
-   All lengthscales are in units of comoving :math:`\mathrm{Mpc}/h`, unless
-   otherwise specified.
-
-.. todo::
-   If there is interest in the code (i.e. not only the algorithm), it
-   should be converted to use classes as that will enormously reduce
-   the amount of arguments to be passed around, will make the code more
-   readable, and reduce the chances for introducing bugs. Some of the
-   functions are already converted to using classes in a separate
-   branch, but converting the whole code will take some time.
-
-pyCOLA modules
-=================
-
-.. include:: ic.rst
-.. include:: growth.rst
-.. include:: cic.rst
-.. include:: potential.rst
-.. include:: acceleration.rst
-.. include:: evolve.rst
-Auxiliary
--------------------
-.. include:: box_smooth.rst
-.. include:: aux.rst
-
-
+All lengthscales are in units of comoving Mpc/h, unless otherwise specified.
 
 
 Worked-out example
-==================
+------------------
 
-.. include:: example.rst
+The following example is contained in `examples/example.py`. It reads in a
+MUSIC-generated initial conditions at first order; calculates the
+second-order initial displacements on the full box; then runs COLA and
+finally outputs a figure containing a density slice. The script needs
+[matplotlib](http://matplotlib.org/) to be installed.
 
+To run the script, first generate MUSIC initial conditions with the
+included configuration file:
 
+    MUSIC ics.conf
 
-.. [MUSIC] `Multi-scale initial conditions for cosmological
-   simulations`, O. Hahn, T. Abel, Monthly Notices of the Royal
-   Astronomical Society, 415, 2101 (2011), `arXiv:1103.6031
-   <http://http://arxiv.org/abs/1103.6031>`_. The code can be found
-   on `this website <http://www.phys.ethz.ch/~hahn/MUSIC/>`_.
+Then change the variable `music_file` below to point to the MUSIC
+snapshot, and then execute the example script by issuing:
 
-.. [spatialCOLA] `Extending the N-body Comoving Lagrangian
-   Acceleration Method to the Spatial Domain`, S. Tassev, D.
-   J. Eisenstein, B. D. Wandelt, M. Zaldarriaga, (2014),
-   `arXiv:14??.???? <http://arxiv.org/abs/arXiv:14??.????>`_
+    python ./example.py
 
-.. [temporalCOLA] `Solving Large Scale Structure in Ten Easy Steps with
-   COLA`, S. Tassev, M. Zaldarriaga, D. J. Eisenstein, Journal of
-   Cosmology and Astroparticle Physics, 06, 036
-   (2013), `arXiv:1301.0322 <http://arxiv.org/abs/arXiv:1301.0322>`_
+This example script was used with minor modifications in making the
+figures for the paper. It fits comfortably on 24GB RAM. If that is not
+available, decreasing `gridscale` to 1, reduces RAM consumption to 11GB
+at the cost of reducing force resolution and producing artifacts.
+
+Most of the time, the script spends on calculating the second-order
+displacement field for the whole box, i.e. not on the COLA calculation.
+On the 4-core laptop that the calculations for the paper were performed
+on, the COLA calculation itself takes about 40 seconds.
+
+The script produces the following figure:
+
+![](slab.jpg)
+
+References
+----------
+
+<a name="MUSIC"></a>[MUSIC]: Multi-scale initial conditions for cosmological
+    simulations, O. Hahn, T. Abel, Monthly Notices of the
+    Royal Astronomical Society, 415, 2101 (2011),
+    [arXiv:1103.6031](http://http://arxiv.org/abs/1103.6031). The code
+    can be found on [this website](http://www.phys.ethz.ch/~hahn/MUSIC/).
+
+<a name="spatialCOLA"></a>[spatialCOLA]: Extending the N-body Comoving Lagrangian Acceleration Method to the
+    Spatial Domain, S. Tassev, D. J. Eisenstein, B. D.
+    Wandelt, M. Zaldarriaga, (2015),
+    [arXiv:1502.07751](http://arxiv.org/abs/arXiv:1502.07751)
+
+<a name="temporalCOLA"></a>[temporalCOLA]: Solving Large Scale Structure in Ten Easy Steps with
+    COLA, S. Tassev, M. Zaldarriaga, D. J. Eisenstein,
+    Journal of Cosmology and Astroparticle Physics, 06, 036 (2013),
+    [arXiv:1301.0322](http://arxiv.org/abs/arXiv:1301.0322)

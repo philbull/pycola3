@@ -28,35 +28,17 @@ class COLABox(object):
         This class can be used to generate initial conditions, evolve the
         particle field, and deposit it onto a regular grid for example.
 
-        Parameters
-        ----------
-        ngrid : int
-            Number of grid cells in each dimension.
-
-        nparticles : int
-            Number of particles in each dimension.
-
-        box_size : float
-            Linear dimension of the cubic box, in Mpc/h units.
-
-        z_init : float
-            Initial redshift of the COLA evolution.
-
-        z_final : float, optional
-            Final redshift of the COLA evolution. Default: 0.
-
-        omega_m : float, optional
-            Fractional matter density today. A flat LCDM cosmology is assumed.
-            Default: 0.316.
-
-        h : float, optional
-            Dimensionless Hubble parameter. Default: 0.67.
-
-        pspec : callable or str, optional
-            Either a callable function that return the matter power spectrum as
-            a function of k (in h/Mpc units), or the filename of a data file
-            containing the matter power spectrum at z=0, in Mpc/h units.
-            Default: "camb_matterpower_z0.dat"
+        Parameters:
+            ngrid (int): Number of grid cells in each dimension.
+            nparticles (int): Number of particles in each dimension.
+            box_size (float): Linear dimension of the cubic box, in Mpc/h units.
+            z_init (float): Initial redshift of the COLA evolution.
+            z_final (float, optional): Final redshift of the COLA evolution.
+            omega_m (float, optional): Fractional matter density today. A flat LCDM cosmology is assumed.
+            h (float, optional): Dimensionless Hubble parameter.
+            pspec (callable or str, optional): Either a callable function that return the matter power spectrum as
+                a function of k (in h/Mpc units), or the filename of a data file
+                containing the matter power spectrum at z=0, in Mpc/h units.
         """
         assert isinstance(box_size, (float, np.float)), "box_size must be a float"
         self.box_size = box_size
@@ -88,15 +70,11 @@ class COLABox(object):
     def particle_mass(self, z):
         """Calculate the particle mass in units of M_sun.
 
-        Parameters
-        ----------
-        z : float
-            Redshift to evaluate the mean matter density at.
+        Parameters:
+            z (float): Redshift to evaluate the mean matter density at.
 
-        Returns
-        -------
-        particle_mass : float
-            Inferred mass of each particle, in M_sun.
+        Returns:
+            particle_mass (float): Inferred mass of each particle, in M_sun.
         """
         # Mean density in pycola units, should be 1 on average
         G = 6.674e-11  # m^3 / kg / s^2
@@ -120,20 +98,15 @@ class COLABox(object):
         displacements. The initial power spectrum is derived from the matter
         power spectrum at z=0.
 
-        Parameters
-        ----------
-        seed : int
-            Random seed to use when generating random initial conditions.
+        Parameters:
+            seed (int): Random seed to use when generating random initial conditions.
 
-        Returns
-        -------
-        sx, sy, sz : array_like
-            Initial 1LPT particle displacements, from the Zel'dovich approx.
-            These data are also stored in ``self.sx, self.sy, self.sz``.
+        Returns:
+            sx, sy, sz, sx2, sy2, sz2 (array_like): 1LPT and 2LPT particle displacement arrays.
 
-        sx2, sy2, sz2 : array_like
-            2LPT particle displacements, derived from the 1LPT displacements.
-            These data are also stored in ``self.sx2, self.sy2, self.sz2``.
+            - ``sx, sy, sz (array_like)``: Initial 1LPT particle displacements, from the Zel'dovich approx. These data are also stored in ``self.sx, self.sy, self.sz``.
+
+            - ``sx2, sy2, sz2 (array_like)``: 2LPT particle displacements, derived from the 1LPT displacements. These data are also stored in ``self.sx2, self.sy2, self.sz2``.
         """
         self.seed = seed
 
@@ -164,35 +137,33 @@ class COLABox(object):
         Evolve an initial set of particle displacements from the initial to
         final redshift, using the COLA scheme.
 
-        Parameters
-        ----------
-        s_vec : tuple of array_like
-            If specified as a tuple ``(sx, sy, sz)``, use these 1LPT particle
-            displacements for the initial particle positions. Otherwise, the
-            stored ``(self.sx, self.sy, self.sz)`` positions are used.
-            Default: None (use stored values).
-        s2_vec : tuple of array_like
-            If specified as a tuple ``(sx2, sy2, sz2)``, use these 2LPT
-            particle displacements for the initial particle positions.
-            Otherwise, the stored ``(self.sx2, self.sy2, self.sz2)`` positions
-            are used. Default: None (use stored values).
-        n_steps : int, optional
-            The total number of timesteps that the COLA algorithm should make.
-            For good results, the number of steps should be near to the inverse
-            of the starting scale factor, ``n_steps ~ 1/a_init``. Default: 15.
-        ncola : float, optional
-            The spectral index for the time-domain COLA evolution. Reasonable
-            values lie in the range ``(-4, 3.5)``. Can't be 0 exactly, but can
-            be near 0. See Section A.3 of [temporalCOLA]_. Default: -2.5.
+        Parameters:
+            s_vec (tuple of array_like):
+                If specified as a tuple ``(sx, sy, sz)``, use these 1LPT particle
+                displacements for the initial particle positions. Otherwise, the
+                stored ``(self.sx, self.sy, self.sz)`` positions are used.
+            s2_vec (tuple of array_like):
+                If specified as a tuple ``(sx2, sy2, sz2)``, use these 2LPT
+                particle displacements for the initial particle positions.
+                Otherwise, the stored ``(self.sx2, self.sy2, self.sz2)`` positions
+                are used.
+            n_steps (int, optional):
+                The total number of timesteps that the COLA algorithm should make.
+                For good results, the number of steps should be near to the inverse
+                of the starting scale factor, ``n_steps ~ 1/a_init``.
+            ncola (float, optional):
+                The spectral index for the time-domain COLA evolution. Reasonable
+                values lie in the range ``(-4, 3.5)``. Can't be 0 exactly, but can
+                be near 0. See Section A.3 of [temporalCOLA](http://arxiv.org/abs/arXiv:1301.0322).
 
-        Returns
-        -------
-        px, py, pz : array_like
-            Return final particle displacements at z_final, in Mpc/h. These
-            data are also stored in ``(self.px, self.py, self.pz)``.
-        vx, vy, vz : array_like
-            Return final particle velocities, in Mpc/h units. These data are
-            also stored in ``(self.vx, self.vy, self.vz)``.
+        Returns:
+            px, py, pz, vx, vy, vz (array_like): Particle displacements and velocities.
+
+                - ``px, py, pz``: Final particle displacements at z_final, in Mpc/h. These
+                data are also stored in ``(self.px, self.py, self.pz)``.
+
+                - ``vx, vy, vz``: Final particle velocities, in Mpc/h units. These data are
+                also stored in ``(self.vx, self.vy, self.vz)``.
         """
         # Check initial particle displacements
         if s_vec is not None:
@@ -249,19 +220,17 @@ class COLABox(object):
         """
         Deposit particles onto a gridded density field using CIC.
 
-        Parameters
-        ----------
-        px, py, pz : array_like, optional
-            If specified, use these particle displacements when performing the
-            CIC operation. Otherwise, use the stored values, ``self.px`` etc.
+        Parameters:
+            px, py, pz (array_like, optional):
+                If specified, use these particle displacements when performing the
+                CIC operation. Otherwise, use the stored values, ``self.px`` etc.
 
-        Returns
-        -------
-        density : array_like
-            Density field on a regular grid of shape ``(ngrid, ngrid, ngrid)``,
-            where ``ngrid = self.ngrid``. If ``self.nparticles == self.ngrid``,
-            the output can be interpreted as ``density == (1 + delta)``, where
-            ``delta`` is the total matter density contrast.
+        Returns:
+            density (array_like):
+                Density field on a regular grid of shape ``(ngrid, ngrid, ngrid)``,
+                where ``ngrid = self.ngrid``. If ``self.nparticles == self.ngrid``,
+                the output can be interpreted as ``density == (1 + delta)``, where
+                ``delta`` is the total matter density contrast.
         """
         # Handle input data
         if px is None:
@@ -316,11 +285,10 @@ class COLABox(object):
         Return a dictionary containing the particle displacement, velocity, and
         mass data in a format suitable for ``yt``.
 
-        Returns
-        -------
-        data : dict
-            Dictionary with flattened arrays with keys 'particle_position_x',
-            'particle_velocity_x', 'particle_mass' etc.
+        Returns:
+            data (dict):
+                Dictionary with flattened arrays with keys 'particle_position_x',
+                'particle_velocity_x', 'particle_mass' etc.
         """
         data = {
             "particle_position_x": self.px.flatten(),
