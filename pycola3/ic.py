@@ -731,9 +731,9 @@ def ic_2lpt_engine(
             sy_4pt_zoom = 0.0
             sz_4pt_zoom = 0.0
 
-    from acceleration import grad_phi
-    from cic import CICDeposit_3
-    from potential import get_phi, initialize_density
+    from .acceleration import grad_phi
+    from .cic import CICDeposit_3
+    from .potential import get_phi, initialize_density
 
     ###
     density, den_k, den_fft, phi_fft = initialize_density(ngrid_x, ngrid_y, ngrid_z)

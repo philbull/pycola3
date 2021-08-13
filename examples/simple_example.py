@@ -4,6 +4,11 @@ Use simple COLABox interface to generate a density field realisation.
 import numpy as np
 import pylab as plt
 import pycola3
+import os
+
+# Use the CAMB matter power spectrum file in the same directory as this script
+dirname = os.path.dirname(__file__)
+pspec_file = os.path.join(dirname, "camb_matterpower_z0.dat")
 
 # Initialise COLABox object
 # (note that the input matter power spectrum should be evaluated at z=0)
@@ -15,7 +20,7 @@ box = pycola3.COLABox(
     z_final=0.0,
     omega_m=0.316,
     h=0.67,
-    pspec_file="camb_matterpower_z0.dat",
+    pspec=pspec_file,
 )
 
 # Initialise initial particle displacements

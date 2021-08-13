@@ -24,6 +24,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from pycola3.aux import boundaries
 from pycola3.cic import CICDeposit_3
@@ -33,6 +34,10 @@ from pycola3.potential import initialize_density
 
 # Set up the parameters from the MUSIC ic snapshot:
 music_file = "/media/stuff/ohahn-music-116353436ee6/ic_za.hdf5"  # CHANGE!
+assert os.path.exists(music_file), (
+    "The input MUSIC IC snapshot file was not found. You must generate this "
+    "file yourself and change advanced_example.py to point to the correct file."
+)
 
 # Set up according to instructions for
 # aux.boundaries()
